@@ -33,4 +33,4 @@ jobs:
     - name: Test package build and install
       run: |
         python setup.py install
-        icecrust version
+        icecrust --version

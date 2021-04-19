@@ -80,8 +80,8 @@ Any errors will result in a non-zero return.
 
 Display installed version:
 ```
-user@localhost:~/$ icecrust version
-Current version: v0.1.0
+user@localhost:~/$ icecrust --version
+icecrust, version 0.1.0
 ```
 
 Example of detached signature verification:
