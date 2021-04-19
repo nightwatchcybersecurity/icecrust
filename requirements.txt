@@ -3,6 +3,7 @@
 # pip -r requirements.txt
 
 click>=7.1.2
+filehash>=0.1.dev5
 python-gnupg>=0.4.7
 requests>=2.24.0
 requests_mock>=1.8.0
