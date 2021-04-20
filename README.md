@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/nightwatchcybersecurity/icecrust/branch/master/graph/badge.svg)](https://codecov.io/gh/nightwatchcybersecurity/icecrust)
 ![GitHub](https://img.shields.io/github/license/nightwatchcybersecurity/icecrust.svg)
 
-A CI/CD-friendly tool for verification of software downloads using checksums and PGP.
+A tool for verification of software downloads using checksums and PGP.
 
 ## Requirements
 Python 3 is required and you can find all required modules in the **requirements.txt** file.

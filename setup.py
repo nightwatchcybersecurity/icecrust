@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 setup(
     name='icecrust',
     version=IcecrustUtils.get_version(),
-    description='A CI/CD-friendly tool for verification of software downloads using checksums and PGP.',
+    description='A tool for verification of software downloads using checksums and PGP.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/nightwatchcybersecurity/icecrust',
