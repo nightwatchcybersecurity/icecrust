@@ -25,6 +25,7 @@ from pathlib import Path
 import sys, tempfile
 
 import click
+import filehash
 from filehash import FileHash
 import gnupg
 
@@ -44,7 +45,7 @@ class IcecrustUtils(object):
     @staticmethod
     def compare_files(file1, file2, verbose=False):
         """
-        Compare files using SHA-256 hashes
+        Compare files by calculating and comparing SHA-256 hashes
 
         :param file1: First file to compare
         :param file2: Second file to compare
@@ -73,14 +74,16 @@ class IcecrustUtils(object):
             return False
 
     @staticmethod
-    def pgpverify(filename, signaturefile, verbose, temp_dir=None, keyfile=None, keyid=None, keyserver=None):
+    def pgp_init(temp_dir=None):
         # Setup GPG
         if temp_dir is None:
             gpg_home = tempfile.TemporaryDirectory()
-            gpg = gnupg.GPG(gnupghome=gpg_home.name)
+            return gnupg.GPG(gnupghome=gpg_home.name)
         else:
-            gpg = gnupg.GPG(gnupghome=temp_dir)
+            return gnupg.GPG(gnupghome=temp_dir)
 
+    @staticmethod
+    def pgp_import_keys(gpg, verbose, keyfile=None, keyid=None, keyserver=None):
         # Import keys from file or server
         if keyfile:
             keydata = Path(keyfile).read_text()
@@ -92,9 +95,12 @@ class IcecrustUtils(object):
             click.echo(import_result.stderr)
 
         if import_result.imported == 0:
-            click.echo('ERROR: No keys found')
-            sys.exit(-1)
+            return False
+        else:
+            return True
 
+    @staticmethod
+    def pgp_verify(gpg, filename, signaturefile, verbose):
         # Verify signature
         signature = open(signaturefile, "rb")
         verification_result = gpg.verify_file(signature, filename)
@@ -102,11 +108,7 @@ class IcecrustUtils(object):
             click.echo('\n--- Results of verification ---')
             click.echo(verification_result.stderr)
 
-        if verification_result.status != 'signature valid':
-            click.echo('ERROR: Unable to verify file')
-            sys.exit(-1)
-
-        click.echo(verification_result.status)
+        return verification_result.status == 'signature valid'
 
 
     @staticmethod
@@ -121,6 +123,10 @@ class IcecrustUtils(object):
         :param verbose: if True, output additional output
         :return: True if matches, False if doesn't match
         """
+        # Check algorithm for valid values
+        if algorithm not in filehash.SUPPORTED_ALGORITHMS:
+            raise ValueError('Unsupported algorithm value')
+
         # Calculate the hash
         try:
             calculated_hash = FileHash(algorithm).hash_file(filename=filename)

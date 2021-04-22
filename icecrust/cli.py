@@ -31,7 +31,7 @@ from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 @click.group()
 def cli():
     """
-    icecrust - A tool for verification of software downloads using checksums and PGP.
+    icecrust - A tool for verification of software downloads using checksums and/or PGP.
 
     Copyright (c) 2021 Nightwatch Cybersecurity.
     Source code: https://github.com/nightwatchcybersecurity/icecrust
@@ -39,44 +39,44 @@ def cli():
     # TODO: Add input validation
     # TODO: Move private code into a separate module
 
-@cli.command('comparefiles')
+@cli.command('compare_files')
 @click.argument('file1', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('file2', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
-def comparefiles(file1, file2, verbose):
-    """Compares two files (using SHA-256 hashes)"""
+def compare_files(file1, file2, verbose):
+    """Compares two files by calculating hashes"""
     # Calculate the checksums and return result
     comparison_result = IcecrustUtils.compare_files(file1, file2, verbose)
     if comparison_result:
-        click.echo('File verified')
+        click.echo('Files are the same')
     else:
-        click.echo('ERROR: File verified!')
+        click.echo('ERROR: Files are not the same!')
         sys.exit(-1)
 
 
-@cli.command('verifychecksum')
+@cli.command('verify_via_checksum')
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.option('--checksum', required=True)
 @click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, type=click.Choice(['sha1', 'sha256', 'sha512'], case_sensitive=False))
-def verify_checksum_with_file(filename, checksum, verbose, algorithm):
-    '''Verify with hash and checksum value'''
+def verify_via_checksum(filename, checksum, verbose, algorithm):
+    '''Verify via a checksum value'''
     # Check hash and output results
     checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksum=checksum)
     if checksum_valid:
-        click.echo('File verified')
+        click.echo('Files verified')
     else:
-        click.echo('ERROR: File cannot be verified!')
+        click.echo('ERROR: Files cannot be verified!')
         sys.exit(-1)
 
 
-@cli.command('verifychecksum_with_file')
+@cli.command('verify_via_checksumfile')
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('checksumfile', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, type=click.Choice(['sha1', 'sha256', 'sha512'], case_sensitive=False))
-def verify_checksum_with_file(filename, checksumfile, verbose, algorithm):
-    '''Verify with hash and checksums file'''
+def verify_via_checksumfile(filename, checksumfile, verbose, algorithm):
+    '''Verify via a checksums file'''
     # Check hash and output results
     checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksumfile=checksumfile)
     if checksum_valid:
@@ -85,69 +85,78 @@ def verify_checksum_with_file(filename, checksumfile, verbose, algorithm):
         click.echo('ERROR: File cannot be verified!')
         sys.exit(-1)
 
+@cli.command('verify_via_pgp')
+@click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
+@click.argument('signaturefile', required=True, type=click.Path(exists=True, dir_okay=False))
+@click.option('--keyfile', required=False, type=click.Path(exists=True, dir_okay=False))
+@click.option('--keyid', required=False)
+@click.option('--keyserver', required=False)
+@click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
+def verify_via_pgp(filename, signaturefile, keyfile, keyid, keyserver, verbose):
+    '''Verify via a PGP signature'''
+    # Check input parameters
+    if keyfile is None and keyid is None and keyserver is None:
+        click.echo("ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!")
+        exit(-1)
+    elif keyfile is None and (keyid is None or keyserver is None):
+        click.echo("ERROR: Both '--keyid' and '--keyserver' parameters must be set!")
+        exit(-1)
 
-@cli.command('verifychecksum_with_keyid')
+    # Initialize PGP and import keys
+    gpg = IcecrustUtils.pgp_init()
+    import_result = IcecrustUtils.pgp_import_keys(gpg, verbose, keyfile=keyfile, keyid=keyid, keyserver=keyserver)
+    if import_result is False:
+        click.echo('ERROR: No keys found')
+        sys.exit(-1)
+
+    # Verify file
+    verification_result = IcecrustUtils.pgpverify(gpg, filename, signaturefile, verbose)
+    if verification_result.status is True:
+        click.echo('File verified')
+    else:
+        click.echo('ERROR: File cannot be verified!')
+        sys.exit(-1)
+
+
+@cli.command('verify_via_pgpchecksumfile')
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('checksumfile', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('signaturefile', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, type=click.Choice(['sha1', 'sha256', 'sha512'], case_sensitive=False))
-@click.option('--keyid', required=True)
-@click.option('--keyserver', required=True)
-def verifychecksum_with_keyid(filename, checksumfile, signaturefile, verbose, algorithm, keyid, keyserver):
-    '''Verify with hash and PGP using a key id'''
-    # Verify the checksum file signature first
-    IcecrustUtils.pgpverify(checksumfile, signaturefile, verbose, keyid=keyid, keyserver=keyserver)
+@click.option('--keyfile', required=False, type=click.Path(exists=True, dir_okay=False))
+@click.option('--keyid', required=False)
+@click.option('--keyserver', required=False)
+def verify_via_pgpchecksumfile(filename, checksumfile, signaturefile, verbose, algorithm, keyfile, keyid, keyserver):
+    '''Verify via a PGP-signed checksums file'''
+    # Check input parameters
+    if keyfile is None and keyid is None and keyserver is None:
+        click.echo("ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!")
+        exit(-1)
+    elif keyfile is None and (keyid is None or keyserver is None):
+        click.echo("ERROR: Both '--keyid' and '--keyserver' parameters must be set!")
+        exit(-1)
 
-    # Check hash against checksum file
-    checksum_valid = IcecrustUtils.verify_checksum(filename, checksumfile, algorithm)
-    if checksum_valid:
-        click.echo('File checksum verified against the checksums file')
-    else:
-        click.echo('ERROR: File checksum cannot be found or verified!')
+    # Initialize PGP and import keys
+    gpg = IcecrustUtils.pgp_init()
+    import_result = IcecrustUtils.pgp_import_keys(gpg, verbose, keyfile=keyfile, keyid=keyid, keyserver=keyserver)
+    if import_result is False:
+        click.echo('ERROR: No keys found')
         sys.exit(-1)
 
-
-@cli.command('verifychecksum_with_keyfile')
-@click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.argument('checksumfile', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.argument('signaturefile', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
-@click.option('--keyfile', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, type=click.Choice(['sha1', 'sha256', 'sha512'], case_sensitive=False))
-def verifychecksum_with_keyfile(filename, checksumfile, signaturefile, verbose, algorithm, keyfile):
-    '''Verify with hash and PGP using a key file'''
-    # Verify the checksum file signature first
-    IcecrustUtils.pgpverify(checksumfile, signaturefile, verbose, keyfile=keyfile)
-
-    # Check hash against checksum file
-    checksum_valid = IcecrustUtils.verify_checksum(filename, checksumfile, algorithm)
-    if checksum_valid:
-        click.echo('File checksum verified against the checksums file')
-    else:
-        click.echo('ERROR: File checksum cannot be found or verified!')
+    # Verify checksums file
+    verification_result = IcecrustUtils.pgpverify(gpg, checksumfile, signaturefile, verbose)
+    if verification_result.status is False:
+        click.echo('ERROR: File cannot be verified!')
         sys.exit(-1)
 
-
-@cli.command('verifypgp_with_keyfile')
-@click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.argument('signaturefile', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
-@click.option('--keyfile', required=True, type=click.Path(exists=True, dir_okay=False))
-def verifypgp_with_keyfile(filename, signaturefile, verbose, keyfile):
-    '''Verify with PGP using a keyfile'''
-    IcecrustUtils.pgpverify(filename, signaturefile, verbose, keyfile=keyfile)
-
-
-@cli.command('verifypgp_with_keyid')
-@click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.argument('signaturefile', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.option('--keyid', required=True)
-@click.option('--keyserver', required=True)
-@click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
-def verifypgp_with_keyid(filename, signaturefile, keyid, keyserver, verbose):
-    '''Verify with PGP using a key id'''
-    IcecrustUtils.pgpverify(filename, signaturefile, keyid=keyid, keyserver=keyserver)
+    # Check hash against the checksums file
+    checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksumfile=checksumfile)
+    if checksum_valid:
+        click.echo('File verified')
+    else:
+        click.echo('ERROR: File cannot be verified!')
+        sys.exit(-1)
 
 
 # @cli.command('canary')

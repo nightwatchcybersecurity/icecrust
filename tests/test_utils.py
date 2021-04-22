@@ -23,6 +23,8 @@
 #
 import re
 
+import pytest
+
 from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 
 # Directory with test data
@@ -98,3 +100,18 @@ class TestUtilsVerifyChecksum(object):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file2.txt', DEFAULT_HASH_ALGORITHM,
                                              checksumfile=TEST_DIR + 'file1.txt.SHA256SUMS') is False
 
+    def test_invalid_algorithm_checksum1(self):
+        assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', 'md5',
+                                             checksum=FILE1_HASH) is False
+
+    def test_invalid_algorithm_checksumfile1(self):
+        assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', 'md5',
+                                             checksumfile=TEST_DIR + 'file1.txt.SHA256SUMS') is False
+
+    def test_invalid_algorithm_checksum2(self):
+        with pytest.raises(ValueError):
+            IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', 'rc4', checksum=FILE1_HASH) is False
+
+    def test_invalid_algorithm_checksumfile2(self):
+        with pytest.raises(ValueError):
+            IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', 'rc4', checksumfile=TEST_DIR + 'file1.txt.SHA256SUMS') is False
