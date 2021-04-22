@@ -22,7 +22,7 @@
 # under the License.
 #
 from pathlib import Path
-import sys, tempfile
+import tempfile
 
 import click
 import filehash
@@ -43,13 +43,13 @@ class IcecrustUtils(object):
 
 
     @staticmethod
-    def compare_files(file1, file2, verbose=False):
+    def compare_files(verbose, file1, file2):
         """
         Compare files by calculating and comparing SHA-256 hashes
 
+        :param verbose: if True, output additional information
         :param file1: First file to compare
         :param file2: Second file to compare
-        :param verbose: if True, output additional information
         :return: True if matches, False if doesn't match
         """
         # Calculate the hashes
@@ -73,20 +73,34 @@ class IcecrustUtils(object):
         else:
             return False
 
-    @staticmethod
-    def pgp_init(temp_dir=None):
-        # Setup GPG
-        if temp_dir is None:
-            gpg_home = tempfile.TemporaryDirectory()
-            return gnupg.GPG(gnupghome=gpg_home.name)
-        else:
-            return gnupg.GPG(gnupghome=temp_dir)
 
     @staticmethod
-    def pgp_import_keys(gpg, verbose, keyfile=None, keyid=None, keyserver=None):
+    def pgp_import_keys(verbose, gpg, keyfile=None, keyid=None, keyserver=None):
+        """
+        Imports GPG keys into the gpg instance
+
+        :param verbose: if True, output additional output
+        :param gpg: initialized gpg instance
+        :param keyfile: file containing PGP keys to be imported
+        :param keyid: ID of the key to be imported from a key server
+        :param keyserver: domain name of the key server to be used
+        :return: True if import was successful, False otherwise
+        """
+        # Check input parameters
+        if keyfile is None and keyid is None and keyserver is None:
+            raise ValueError("Either 'keyfile' or 'keyid/keyserver' parameters must be set!")
+        elif keyfile is None and (keyid is None or keyserver is None):
+            raise ValueError("Both 'keyid' and 'keyserver' parameters must be set!")
+
         # Import keys from file or server
         if keyfile:
-            keydata = Path(keyfile).read_text()
+            try:
+                keydata = Path(keyfile).read_text()
+            except FileNotFoundError as err:
+                if verbose:
+                    click.echo(err)
+                return False
+
             import_result = gpg.import_keys(keydata)
         else:
             import_result = gpg.recv_keys(keyserver, keyid)
@@ -94,38 +108,77 @@ class IcecrustUtils(object):
             click.echo('--- Results of key import ---\n')
             click.echo(import_result.stderr)
 
+        # Return results
         if import_result.imported == 0:
             return False
         else:
             return True
 
+
     @staticmethod
-    def pgp_verify(gpg, filename, signaturefile, verbose):
-        # Verify signature
-        signature = open(signaturefile, "rb")
+    def pgp_init(gpg_home_dir=None):
+        """
+        Initializes the GPG object
+
+        :param gpg_home_dir: directory to use for GPG home, if not passed, temporary directory will be used
+        :return: initialized gpg instance
+        """
+        # Setup GPG
+        if gpg_home_dir is None:
+            temp_dir = tempfile.TemporaryDirectory()
+            return gnupg.GPG(gnupghome=temp_dir.name, verbose=True)
+        else:
+            return gnupg.GPG(gnupghome=gpg_home_dir, verbose=True)
+
+
+    @staticmethod
+    def pgp_verify(verbose, gpg, filename, signaturefile):
+        """
+        Verifies a file against its PGP signature
+
+        :param verbose: if True, output additional output
+        :param gpg: initialized gpg instance
+        :param filename: file to be verified
+        :param signaturefile: file containing the PGP signature
+        :return: True if verification was successful, False otherwise
+        """
+        # Open signature file
+        try:
+            signature = open(signaturefile, "rb")
+        except FileNotFoundError as err:
+            if verbose:
+                click.echo(err)
+            return False
+
+        # Attempt to verify
         verification_result = gpg.verify_file(signature, filename)
         if verbose:
             click.echo('\n--- Results of verification ---')
             click.echo(verification_result.stderr)
 
+        # Return results
         return verification_result.status == 'signature valid'
 
 
     @staticmethod
-    def verify_checksum(filename, algorithm, checksum=None, checksumfile=None, verbose=False):
+    def verify_checksum(verbose, filename, algorithm, checksum=None, checksumfile=None):
         """
         Calculates a filename hash and compares against the provided checksum or checksums file
 
+        :param verbose: if True, output additional output
         :param filename: Filename used to calculate the hash
+        :param algorithm: Algorithm to use for hashing
         :param checksum: Checksum value
         :param checksumfile: Filename of the file containing checksums, follows the format from shasum
-        :param algorithm: Algorithm to use for hashing
-        :param verbose: if True, output additional output
         :return: True if matches, False if doesn't match
         """
         # Check algorithm for valid values
         if algorithm not in filehash.SUPPORTED_ALGORITHMS:
             raise ValueError('Unsupported algorithm value')
+
+        # Make sure either checksum or checksumfile arguments are set
+        if checksum is None and checksumfile is None:
+            raise ValueError('Either checksum or checksumfile arguments must be set')
 
         # Calculate the hash
         try:
