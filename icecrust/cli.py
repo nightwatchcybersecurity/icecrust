@@ -27,6 +27,21 @@ import click
 from download import download
 from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 
+
+@staticmethod
+def _process_verbose_flag(verbose):
+    """
+    Return message callback object to be used for output, usually click
+
+    :param verbose: if True, return an object to be used for output
+    :return: message callback object
+    """
+    if verbose:
+        return click
+    else:
+        return False
+
+
 @click.version_option(version=IcecrustUtils.get_version(), prog_name='icecrust')
 @click.group()
 def cli():
@@ -46,7 +61,8 @@ def cli():
 def compare_files(verbose, file1, file2):
     """Compares two files by calculating hashes"""
     # Calculate the checksums and return result
-    comparison_result = IcecrustUtils.compare_files(verbose, file1, file2)
+    comparison_result = IcecrustUtils.compare_files(file1, file2,
+                                                    msg_callback=_process_verbose_flag(verbose))
     if comparison_result:
         click.echo('Files are the same')
     else:
@@ -62,7 +78,8 @@ def compare_files(verbose, file1, file2):
 def verify_via_checksum(verbose, filename, checksum, algorithm):
     """Verify via a checksum value"""
     # Check hash and output results
-    checksum_valid = IcecrustUtils.verify_checksum(verbose, filename, algorithm, checksum=checksum)
+    checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksum=checksum,
+                                                   msg_callback=_process_verbose_flag(verbose))
     if checksum_valid:
         click.echo('Files verified')
     else:
@@ -78,7 +95,8 @@ def verify_via_checksum(verbose, filename, checksum, algorithm):
 def verify_via_checksumfile(verbose, filename, checksumfile, algorithm):
     """Verify via a checksums file"""
     # Check hash and output results
-    checksum_valid = IcecrustUtils.verify_checksum(verbose, filename, algorithm, checksumfile=checksumfile)
+    checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksumfile=checksumfile,
+                                                   msg_callback=_process_verbose_flag(verbose))
     if checksum_valid:
         click.echo('File verified')
     else:
@@ -103,14 +121,16 @@ def verify_via_pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
         exit(-1)
 
     # Initialize PGP and import keys
-    gpg = IcecrustUtils.pgp_init()
-    import_result = IcecrustUtils.pgp_import_keys(verbose, gpg, keyfile=keyfile, keyid=keyid, keyserver=keyserver)
+    gpg = IcecrustUtils.pgp_init(verbose)
+    import_result = IcecrustUtils.pgp_import_keys(gpg, keyfile=keyfile, keyid=keyid, keyserver=keyserver,
+                                                  msg_callback=_process_verbose_flag(verbose))
     if import_result is False:
         click.echo('ERROR: No keys found')
         sys.exit(-1)
 
     # Verify file
-    verification_result = IcecrustUtils.pgpverify(verbose, gpg, filename, signaturefile)
+    verification_result = IcecrustUtils.pgpverify(gpg, filename, signaturefile,
+                                                  msg_callback=_process_verbose_flag(verbose))
     if verification_result.status is True:
         click.echo('File verified')
     else:
@@ -138,20 +158,23 @@ def verify_via_pgpchecksumfile(verbose, filename, checksumfile, signaturefile, a
         exit(-1)
 
     # Initialize PGP and import keys
-    gpg = IcecrustUtils.pgp_init()
-    import_result = IcecrustUtils.pgp_import_keys(verbose, gpg, keyfile=keyfile, keyid=keyid, keyserver=keyserver)
+    gpg = IcecrustUtils.pgp_init(verbose)
+    import_result = IcecrustUtils.pgp_import_keys(gpg, keyfile=keyfile, keyid=keyid, keyserver=keyserver,
+                                                  msg_callback=_process_verbose_flag(verbose))
     if import_result is False:
         click.echo('ERROR: No keys found')
         sys.exit(-1)
 
     # Verify checksums file
-    verification_result = IcecrustUtils.pgpverify(verbose, gpg, checksumfile, signaturefile)
+    verification_result = IcecrustUtils.pgpverify(gpg, checksumfile, signaturefile,
+                                                  msg_callback=_process_verbose_flag(verbose))
     if verification_result.status is False:
         click.echo('ERROR: File cannot be verified!')
         sys.exit(-1)
 
     # Check hash against the checksums file
-    checksum_valid = IcecrustUtils.verify_checksum(verbose, filename, algorithm, checksumfile=checksumfile)
+    checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksumfile=checksumfile,
+                                                   msg_callback=_process_verbose_flag(verbose))
     if checksum_valid:
         click.echo('File verified')
     else:

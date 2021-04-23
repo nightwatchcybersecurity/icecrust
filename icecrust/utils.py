@@ -43,13 +43,13 @@ class IcecrustUtils(object):
 
 
     @staticmethod
-    def compare_files(verbose, file1, file2):
+    def compare_files(file1, file2, msg_callback=None, ):
         """
         Compare files by calculating and comparing SHA-256 hashes
 
-        :param verbose: if True, output additional information
         :param file1: First file to compare
         :param file2: Second file to compare
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
         :return: True if matches, False if doesn't match
         """
         # Calculate the hashes
@@ -58,14 +58,14 @@ class IcecrustUtils(object):
             file1_hash = hasher.hash_file(filename=file1)
             file2_hash = hasher.hash_file(filename=file2)
         except FileNotFoundError as err:
-            if verbose:
-                click.echo(err)
+            if msg_callback:
+                msg_callback.echo(str(err))
             return False
 
         # Output additional information if needed
-        if verbose:
-            click.echo('File1 checksum: ' + file1_hash)
-            click.echo('File2 checksum: ' + file2_hash)
+        if msg_callback:
+            msg_callback.echo('File1 checksum: ' + file1_hash)
+            msg_callback.echo('File2 checksum: ' + file2_hash)
 
         # Compare the checksums and return the result
         if file1_hash == file2_hash:
@@ -75,12 +75,12 @@ class IcecrustUtils(object):
 
 
     @staticmethod
-    def pgp_import_keys(verbose, gpg, keyfile=None, keyid=None, keyserver=None):
+    def pgp_import_keys(gpg, msg_callback=None, keyfile=None, keyid=None, keyserver=None):
         """
         Imports GPG keys into the gpg instance
 
-        :param verbose: if True, output additional output
         :param gpg: initialized gpg instance
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
         :param keyfile: file containing PGP keys to be imported
         :param keyid: ID of the key to be imported from a key server
         :param keyserver: domain name of the key server to be used
@@ -97,16 +97,16 @@ class IcecrustUtils(object):
             try:
                 keydata = Path(keyfile).read_text()
             except FileNotFoundError as err:
-                if verbose:
-                    click.echo(err)
+                if msg_callback:
+                    msg_callback.echo(str(err))
                 return False
 
             import_result = gpg.import_keys(keydata)
         else:
             import_result = gpg.recv_keys(keyserver, keyid)
-        if verbose:
-            click.echo('--- Results of key import ---\n')
-            click.echo(import_result.stderr)
+        if msg_callback:
+            msg_callback.echo('--- Results of key import ---\n')
+            msg_callback.echo(import_result.stderr)
 
         # Return results
         if import_result.imported == 0:
@@ -116,58 +116,59 @@ class IcecrustUtils(object):
 
 
     @staticmethod
-    def pgp_init(gpg_home_dir=None):
+    def pgp_init(gpg_home_dir=None, verbose=False):
         """
         Initializes the GPG object
 
         :param gpg_home_dir: directory to use for GPG home, if not passed, temporary directory will be used
+        :param verbose: whether GPG should output additional data, used for debugging
         :return: initialized gpg instance
         """
         # Setup GPG
         if gpg_home_dir is None:
             temp_dir = tempfile.TemporaryDirectory()
-            return gnupg.GPG(gnupghome=temp_dir.name, verbose=True)
+            return gnupg.GPG(gnupghome=temp_dir.name, verbose=verbose)
         else:
-            return gnupg.GPG(gnupghome=gpg_home_dir, verbose=True)
+            return gnupg.GPG(gnupghome=gpg_home_dir, verbose=verbose)
 
 
     @staticmethod
-    def pgp_verify(verbose, gpg, filename, signaturefile):
+    def pgp_verify(gpg, filename, signaturefile, msg_callback=None):
         """
         Verifies a file against its PGP signature
 
-        :param verbose: if True, output additional output
         :param gpg: initialized gpg instance
         :param filename: file to be verified
         :param signaturefile: file containing the PGP signature
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
         :return: True if verification was successful, False otherwise
         """
         # Open signature file
         try:
             signature = open(signaturefile, "rb")
         except FileNotFoundError as err:
-            if verbose:
-                click.echo(err)
+            if msg_callback:
+                msg_callback.echo(str(err))
             return False
 
         # Attempt to verify
         verification_result = gpg.verify_file(signature, filename)
-        if verbose:
-            click.echo('\n--- Results of verification ---')
-            click.echo(verification_result.stderr)
+        if msg_callback:
+            msg_callback.echo('\n--- Results of verification ---')
+            msg_callback.echo(verification_result.stderr)
 
         # Return results
         return verification_result.status == 'signature valid'
 
 
     @staticmethod
-    def verify_checksum(verbose, filename, algorithm, checksum=None, checksumfile=None):
+    def verify_checksum(filename, algorithm, msg_callback=None, checksum=None, checksumfile=None):
         """
         Calculates a filename hash and compares against the provided checksum or checksums file
 
-        :param verbose: if True, output additional output
         :param filename: Filename used to calculate the hash
         :param algorithm: Algorithm to use for hashing
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
         :param checksum: Checksum value
         :param checksumfile: Filename of the file containing checksums, follows the format from shasum
         :return: True if matches, False if doesn't match
@@ -184,14 +185,14 @@ class IcecrustUtils(object):
         try:
             calculated_hash = FileHash(algorithm).hash_file(filename=filename)
         except FileNotFoundError as err:
-            if verbose:
-                click.echo(err)
+            if msg_callback:
+                msg_callback.echo(str(err))
             return False
 
         # Output additional information if needed
-        if verbose:
-            click.echo('Algorithm: ' + algorithm)
-            click.echo('File hash: ' + calculated_hash)
+        if msg_callback:
+            msg_callback.echo('Algorithm: ' + algorithm)
+            msg_callback.echo('File hash: ' + calculated_hash)
 
         # Compare the checksums and return the result
         if checksum:
@@ -200,8 +201,8 @@ class IcecrustUtils(object):
             try:
                 checksums_content = Path(checksumfile).read_text()
             except (FileNotFoundError, TypeError) as err:
-                if verbose:
-                    click.echo(err)
+                if msg_callback:
+                    msg_callback.echo(str(err))
                 return False
             return calculated_hash in checksums_content
 
