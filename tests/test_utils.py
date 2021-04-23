@@ -23,8 +23,7 @@
 #
 import re, shutil
 
-import gnupg
-import pytest
+import gnupg, pytest
 
 from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 
@@ -219,6 +218,13 @@ class TestUtilsPgpInit(object):
         new_dir = tmp_path / "sub"
         new_dir.mkdir()
         assert type(IcecrustUtils.pgp_init(gpg_home_dir=new_dir)) is gnupg.GPG
+
+
+# Tests for utils.process_verbose_flag()
+class TestUtilsProcessVerboseFlag(object):
+    def test_valid(self):
+        assert IcecrustUtils.process_verbose_flag(False) is False
+        assert IcecrustUtils.process_verbose_flag(None) is False
 
 
 # Tests for utils.verify_checksum()

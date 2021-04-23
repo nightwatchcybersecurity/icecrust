@@ -21,13 +21,10 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import re, shutil
-
 from click.testing import CliRunner
-import pytest
 
 from icecrust.cli import cli
-from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
+from icecrust.utils import IcecrustUtils
 from test_utils import TEST_DIR, FILE1_HASH, FILE2_HASH
 
 

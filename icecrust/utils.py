@@ -24,10 +24,7 @@
 from pathlib import Path
 import tempfile
 
-import click
-import filehash
-from filehash import FileHash
-import gnupg
+import click, filehash, gnupg
 
 # Default hash algorithm to use for checksums
 DEFAULT_HASH_ALGORITHM = 'sha256'
@@ -53,7 +50,7 @@ class IcecrustUtils(object):
         :return: True if matches, False if doesn't match
         """
         # Calculate the hashes
-        hasher = FileHash(DEFAULT_HASH_ALGORITHM)
+        hasher = filehash.FileHash(DEFAULT_HASH_ALGORITHM)
         try:
             file1_hash = hasher.hash_file(filename=file1)
             file2_hash = hasher.hash_file(filename=file2)
@@ -160,6 +157,18 @@ class IcecrustUtils(object):
         # Return results
         return verification_result.status == 'signature valid'
 
+    @staticmethod
+    def process_verbose_flag(verbose):
+        """
+        Return message callback object to be used for output, usually click
+
+        :param verbose: if True, return an object to be used for output
+        :return: message callback object
+        """
+        if verbose:
+            return click
+        else:
+            return False
 
     @staticmethod
     def verify_checksum(filename, algorithm, msg_callback=None, checksum=None, checksumfile=None):
@@ -183,7 +192,7 @@ class IcecrustUtils(object):
 
         # Calculate the hash
         try:
-            calculated_hash = FileHash(algorithm).hash_file(filename=filename)
+            calculated_hash = filehash.FileHash(algorithm).hash_file(filename=filename)
         except FileNotFoundError as err:
             if msg_callback:
                 msg_callback.echo(str(err))
@@ -205,4 +214,3 @@ class IcecrustUtils(object):
                     msg_callback.echo(str(err))
                 return False
             return calculated_hash in checksums_content
-
