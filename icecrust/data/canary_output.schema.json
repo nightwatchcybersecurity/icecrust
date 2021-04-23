@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Output schema for icecrust_canary project - [github.com/nightwatchcybersecurity/icecrust]",
+  "required": [
+    "timestamp",
+    "filename_url",
+    "verification_mode",
+    "verified",
+    "output"
+  ],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Timestamp when verification was ran"
+     },
+    "filename_url": {
+      "type": "string",
+      "format": "uri",
+      "title": "File URL to be checked",
+      "pattern": "^https://(.*)$"
+     },
+    "verification_mode": {
+      "type": "string",
+      "enum": [
+        "compare_files",
+        "verify_via_checksum",
+        "verify_via_checksumfile", 
+        "verify_via_pgp", 
+        "verify_via_pgpchecksumfile"
+      ],
+      "title": "Verification mode used"
+     },
+    "verified": {
+      "type": "boolean",
+      "title": "Whether verification was sucessful or not"
+     },
+    "output": {
+      "type": "string",
+      "title": "Output/logs of the verification process"
+     }
+  }
+}

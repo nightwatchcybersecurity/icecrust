@@ -21,11 +21,12 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import re, shutil
+import json, pkg_resources, re, shutil
 
-import gnupg, pytest
+import gnupg, jsonschema, pytest
 
-from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
+from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils,\
+    VERIFICATION_MODES, CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA
 
 # Directory with test data
 TEST_DIR = 'test_data/'
@@ -57,11 +58,33 @@ def mock_msg_callback():
     return MockMsgCallback()
 
 
-# Tests for utils.get_version()
-class TestUtilsGetVersion(object):
-    def test_format_valid(self):
+# Tests for misc utils methods
+class TestUtils(object):
+    def test_const_default_algorithm(self):
+        assert DEFAULT_HASH_ALGORITHM == 'sha256'
+
+    def test_const_verification_modes(self):
+        assert len(VERIFICATION_MODES) == 5
+        assert 'compare_files' in VERIFICATION_MODES
+        assert 'verify_via_checksum' in VERIFICATION_MODES
+        assert 'verify_via_checksumfile' in VERIFICATION_MODES
+        assert 'verify_via_pgp' in VERIFICATION_MODES
+        assert 'verify_via_pgpchecksumfile' in VERIFICATION_MODES
+
+    def test_get_version_format_valid(self):
         pattern = re.compile(r'^(\d+\.)?(\d+\.)?(\*|\d+)$')
         assert pattern.match(IcecrustUtils.get_version()) is not None
+
+    def test_process_verbose_flag_valid(self):
+        assert IcecrustUtils.process_verbose_flag(False) is False
+        assert IcecrustUtils.process_verbose_flag(None) is False
+
+    def test_canary_schemas_valid(self):
+        input_schema = json.load(open(CANARY_INPUT_SCHEMA, 'r'))
+        output_schema = json.load(open(CANARY_OUTPUT_SCHEMA, 'r'))
+        jsonschema.Draft7Validator.check_schema(input_schema)
+        jsonschema.Draft7Validator.check_schema(output_schema)
+        assert True
 
 
 # Tests for utils.compare_files()
@@ -220,13 +243,6 @@ class TestUtilsPgpInit(object):
         assert type(IcecrustUtils.pgp_init(gpg_home_dir=new_dir)) is gnupg.GPG
 
 
-# Tests for utils.process_verbose_flag()
-class TestUtilsProcessVerboseFlag(object):
-    def test_valid(self):
-        assert IcecrustUtils.process_verbose_flag(False) is False
-        assert IcecrustUtils.process_verbose_flag(None) is False
-
-
 # Tests for utils.verify_checksum()
 class TestUtilsVerifyChecksum(object):
     def test_doesnt_exists_file(self):
@@ -259,11 +275,11 @@ class TestUtilsVerifyChecksum(object):
 
     def test_valid_checksum(self):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', DEFAULT_HASH_ALGORITHM,
-                                             checksum=FILE1_HASH) is True
+                                             checksum_value=FILE1_HASH) is True
 
     def test_valid_checksum_verbose(self, mock_msg_callback):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', DEFAULT_HASH_ALGORITHM,
-                                             checksum=FILE1_HASH,
+                                             checksum_value=FILE1_HASH,
                                              msg_callback=mock_msg_callback) is True
         assert len(mock_msg_callback.messages) == 2
         assert mock_msg_callback.messages[0] == 'Algorithm: sha256'
@@ -271,15 +287,15 @@ class TestUtilsVerifyChecksum(object):
 
     def test_valid_checksum_and_invalid_file(self):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', DEFAULT_HASH_ALGORITHM,
-                                             checksum=FILE1_HASH, checksumfile=TEST_DIR + 'foobar') is True
+                                             checksum_value=FILE1_HASH, checksumfile=TEST_DIR + 'foobar') is True
 
     def test_valid_checksum_uppercase(self):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', DEFAULT_HASH_ALGORITHM,
-                                             checksum=FILE1_HASH.upper()) is True
+                                             checksum_value=FILE1_HASH.upper()) is True
 
     def test_valid_checksum_whitespace(self):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', DEFAULT_HASH_ALGORITHM,
-                                             checksum=' ' + FILE1_HASH + ' ') is True
+                                             checksum_value=' ' + FILE1_HASH + ' ') is True
 
     def test_invalid1_checksumfile(self):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt.SHA256SUMS', DEFAULT_HASH_ALGORITHM,
@@ -291,11 +307,11 @@ class TestUtilsVerifyChecksum(object):
 
     def test_invalid_algorithm_checksum1(self):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', 'md5',
-                                             checksum=FILE1_HASH) is False
+                                             checksum_value=FILE1_HASH) is False
 
     def test_invalid_algorithm_checksum2(self):
         with pytest.raises(ValueError):
-            IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', 'rc4', checksum=FILE1_HASH)
+            IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', 'rc4', checksum_value=FILE1_HASH)
 
     def test_invalid_algorithm_checksumfile1(self):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', 'md5',

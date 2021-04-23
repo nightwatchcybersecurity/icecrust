@@ -25,6 +25,8 @@ import json, sys
 
 import click
 from download import download
+from jsonschema.validators import validate
+
 from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 
 
@@ -41,17 +43,19 @@ def cli():
     # TODO: Move private code into a separate module
 
 
+@cli.command('verify')
+@click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
+@click.argument('configfile', required=True, type=click.File('r'))
+def verify(verbose, configfile):
+    """Does a canary check against a project"""
+    # Validate the file against the schema
+    schema_data = json.load(open(INPUT_SCHEMA, 'r'))
+    parsed_data = json.load(open(TEST_DIR + 'canary/pnpm_input.json', 'r'))
+    validate(instance=parsed_data, schema=schema_data)
 
-
-# @cli.command('canary')
-# @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
-# @click.argument('configfile', required=True, type=click.File('r'))
-# def canary(verbose, configfile):
-#     """Does a canary check against a project"""
-#     # TODO: Add JSON schema scheck
-#     config = json.load(configfile)
-#     print('Checking "' + config['name'] + "', located at '" + config['url'] + "'")
-#     print('Verifying file: "' + config['filename_url'] + '"')
+    config = json.load(configfile)
+    print('Checking "' + config['name'] + "', located at '" + config['url'] + "'")
+    print('Verifying file: "' + config['filename_url'] + '"')
 #
 #     # Select the right mode
 #     if config['verification_mode'] == 'checksumverify_with_keyid':

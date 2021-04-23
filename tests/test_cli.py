@@ -99,20 +99,20 @@ class TestCliVerifyChecksum(object):
     def test_valid(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksum', '--algorithm', 'sha256',
-                                     TEST_DIR + 'file1.txt', '--checksum', FILE1_HASH])
+                                     TEST_DIR + 'file1.txt', '--checksum_value', FILE1_HASH])
         assert result.exit_code == 0
         assert result.output == 'File verified\n'
 
     def test_valid_default_algorithm(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_checksum', TEST_DIR + 'file1.txt', '--checksum', FILE1_HASH])
+        result = runner.invoke(cli, ['verify_via_checksum', TEST_DIR + 'file1.txt', '--checksum_value', FILE1_HASH])
         assert result.exit_code == 0
         assert result.output == 'File verified\n'
 
     def test_valid_verbose(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksum',
-                                     '--verbose', TEST_DIR + 'file1.txt', '--checksum', FILE1_HASH])
+                                     '--verbose', TEST_DIR + 'file1.txt', '--checksum_value', FILE1_HASH])
         assert result.exit_code == 0
         assert result.output == 'Algorithm: sha256\n' + \
                'File hash: ' + FILE1_HASH + '\n' + \
@@ -120,14 +120,14 @@ class TestCliVerifyChecksum(object):
 
     def test_invalid(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_checksum', TEST_DIR + 'file1.txt', '--checksum', FILE2_HASH])
+        result = runner.invoke(cli, ['verify_via_checksum', TEST_DIR + 'file1.txt', '--checksum_value', FILE2_HASH])
         assert result.exit_code == -1
         assert result.output == 'ERROR: File cannot be verified!\n'
 
     def test_invalid_wrong_algorithm_verbose(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksum', '--algorithm', 'sha1', '--verbose',
-                                     TEST_DIR + 'file1.txt', '--checksum', FILE2_HASH])
+                                     TEST_DIR + 'file1.txt', '--checksum_value', FILE2_HASH])
         assert result.exit_code == -1
         assert result.output == 'Algorithm: sha1\n' + \
                'File hash: 4045ed3c779e3b27760e4da357279508a8452dcb\n' + \
@@ -136,7 +136,7 @@ class TestCliVerifyChecksum(object):
     def test_invalid_bad_arguments_invalid_algorithm(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksum', '--algorithm', 'foobar',
-                                     TEST_DIR + 'file1.txt', '--checksum', FILE2_HASH])
+                                     TEST_DIR + 'file1.txt', '--checksum_value', FILE2_HASH])
         assert result.exit_code == 2
         assert "Error: Invalid value for '--algorithm': invalid choice: foobar." in result.output
 
@@ -144,11 +144,11 @@ class TestCliVerifyChecksum(object):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksum', TEST_DIR + 'file1.txt'])
         assert result.exit_code == 2
-        assert "Error: Missing option '--checksum'." in result.output
+        assert "Error: Missing option '--checksum_value'." in result.output
 
     def test_invalid_bad_arguments_missing_filename(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_checksum', '--checksum', FILE1_HASH])
+        result = runner.invoke(cli, ['verify_via_checksum', '--checksum_value', FILE1_HASH])
         assert result.exit_code == 2
         assert "Error: Missing argument 'FILENAME'." in result.output
 

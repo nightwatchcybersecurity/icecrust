@@ -22,22 +22,33 @@
 # under the License.
 #
 from pathlib import Path
-import tempfile
+import pkg_resources, tempfile
 
 import click, filehash, gnupg
 
 # Default hash algorithm to use for checksums
 DEFAULT_HASH_ALGORITHM = 'sha256'
 
+# List of available verification modes, based on the command line options in the main CLI class
+VERIFICATION_MODES = [
+    'compare_files',
+    'verify_via_checksum',
+    'verify_via_checksumfile',
+    'verify_via_pgp',
+    'verify_via_pgpchecksumfile'
+]
+
+# Location of the schema files
+CANARY_INPUT_SCHEMA  = pkg_resources.resource_filename('icecrust', 'data/canary_input.schema.json')
+CANARY_OUTPUT_SCHEMA = pkg_resources.resource_filename('icecrust', 'data/canary_output.schema.json')
+
 
 class IcecrustUtils(object):
     """Various utility functions, split off from the main class for ease of unit testing"""
-
     @staticmethod
     def get_version():
         """Gets the current version"""
         return "0.1.0"
-
 
     @staticmethod
     def compare_files(file1, file2, msg_callback=None, ):
@@ -69,7 +80,6 @@ class IcecrustUtils(object):
             return True
         else:
             return False
-
 
     @staticmethod
     def pgp_import_keys(gpg, msg_callback=None, keyfile=None, keyid=None, keyserver=None):
@@ -111,7 +121,6 @@ class IcecrustUtils(object):
         else:
             return True
 
-
     @staticmethod
     def pgp_init(gpg_home_dir=None, verbose=False):
         """
@@ -127,7 +136,6 @@ class IcecrustUtils(object):
             return gnupg.GPG(gnupghome=temp_dir.name, verbose=verbose)
         else:
             return gnupg.GPG(gnupghome=gpg_home_dir, verbose=verbose)
-
 
     @staticmethod
     def pgp_verify(gpg, filename, signaturefile, msg_callback=None):
@@ -171,14 +179,14 @@ class IcecrustUtils(object):
             return False
 
     @staticmethod
-    def verify_checksum(filename, algorithm, msg_callback=None, checksum=None, checksumfile=None):
+    def verify_checksum(filename, algorithm, msg_callback=None, checksum_value=None, checksumfile=None):
         """
         Calculates a filename hash and compares against the provided checksum or checksums file
 
         :param filename: Filename used to calculate the hash
         :param algorithm: Algorithm to use for hashing
         :param msg_callback: message callback object, can be used to collect additional data via .echo()
-        :param checksum: Checksum value
+        :param checksum_value: Checksum value
         :param checksumfile: Filename of the file containing checksums, follows the format from shasum
         :return: True if matches, False if doesn't match
         """
@@ -187,8 +195,8 @@ class IcecrustUtils(object):
             raise ValueError('Unsupported algorithm value')
 
         # Make sure either checksum or checksumfile arguments are set
-        if checksum is None and checksumfile is None:
-            raise ValueError('Either checksum or checksumfile arguments must be set')
+        if checksum_value is None and checksumfile is None:
+            raise ValueError('Either checksum_value or checksumfile arguments must be set')
 
         # Calculate the hash
         try:
@@ -204,8 +212,8 @@ class IcecrustUtils(object):
             msg_callback.echo('File hash: ' + calculated_hash)
 
         # Compare the checksums and return the result
-        if checksum:
-            return calculated_hash == checksum.lower().strip()
+        if checksum_value:
+            return calculated_hash == checksum_value.lower().strip()
         else:
             try:
                 checksums_content = Path(checksumfile).read_text()

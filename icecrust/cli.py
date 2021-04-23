@@ -59,13 +59,13 @@ def compare_files(verbose, file1, file2):
 @cli.command('verify_via_checksum')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.option('--checksum', required=True)
+@click.option('--checksum_value', required=True)
 @click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, type=click.Choice(['sha1', 'sha256', 'sha512'],
                                                                                case_sensitive=False))
-def verify_via_checksum(verbose, filename, checksum, algorithm):
+def verify_via_checksum(verbose, filename, checksum_value, algorithm):
     """Verify via a checksum value"""
     # Check hash and output results
-    checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksum=checksum,
+    checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksum_value=checksum_value,
                                                    msg_callback=IcecrustUtils.process_verbose_flag(verbose))
     if checksum_valid:
         click.echo('File verified')
