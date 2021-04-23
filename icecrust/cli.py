@@ -28,7 +28,6 @@ from download import download
 from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 
 
-@staticmethod
 def _process_verbose_flag(verbose):
     """
     Return message callback object to be used for output, usually click
@@ -54,6 +53,7 @@ def cli():
     # TODO: Add input validation
     # TODO: Move private code into a separate module
 
+
 @cli.command('compare_files')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.argument('file1', required=True, type=click.Path(exists=True, dir_okay=False))
@@ -64,9 +64,9 @@ def compare_files(verbose, file1, file2):
     comparison_result = IcecrustUtils.compare_files(file1, file2,
                                                     msg_callback=_process_verbose_flag(verbose))
     if comparison_result:
-        click.echo('Files are the same')
+        click.echo('Files verified')
     else:
-        click.echo('ERROR: Files are not the same!')
+        click.echo('ERROR: Files cannot be verified!')
         sys.exit(-1)
 
 
@@ -81,9 +81,9 @@ def verify_via_checksum(verbose, filename, checksum, algorithm):
     checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksum=checksum,
                                                    msg_callback=_process_verbose_flag(verbose))
     if checksum_valid:
-        click.echo('Files verified')
+        click.echo('File verified')
     else:
-        click.echo('ERROR: Files cannot be verified!')
+        click.echo('ERROR: File cannot be verified!')
         sys.exit(-1)
 
 
