@@ -26,8 +26,9 @@ import json, sys, tempfile
 import click, jsonschema
 from download import download
 
-from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 from icecrust.canary_utils import CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA, IcecrustCanaryUtils, VerificationModes
+from icecrust.cli import _process_result
+from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 
 
 @click.version_option(version=IcecrustUtils.get_version(), prog_name='icecrust_canary')
@@ -92,11 +93,7 @@ def verify(verbose, configfile):
         # Compare files
         compare_result = IcecrustUtils.compare_files(temp_dir + '/file1.dat', temp_dir + '/file2.dat',
                                                      msg_callback=IcecrustUtils.process_verbose_flag(verbose))
-        if compare_result:
-            click.echo('Files verified')
-        else:
-            click.echo('ERROR: Files cannot be verified!')
-            sys.exit(-1)
+        _process_result(compare_result)
     elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUM:
         # Download the right files
         download(config['filename_url'], temp_dir + '/file1.dat', progressbar=verbose, verbose=verbose)
@@ -108,11 +105,7 @@ def verify(verbose, configfile):
         checksum_valid = IcecrustUtils.verify_checksum(temp_dir + '/file1.dat', algorithm,
                                                        checksum_value=verification_data['checksum_value'],
                                                        msg_callback=IcecrustUtils.process_verbose_flag(verbose))
-        if checksum_valid:
-            click.echo('File verified')
-        else:
-            click.echo('ERROR: File cannot be verified!')
-            sys.exit(-1)
+        _process_result(checksum_valid)
     elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUMFILE:
         # Download the right files
         download(config['filename_url'], temp_dir + '/file1.dat', progressbar=verbose, verbose=verbose)
@@ -126,11 +119,7 @@ def verify(verbose, configfile):
         checksum_valid = IcecrustUtils.verify_checksum(temp_dir + '/file1.dat', algorithm,
                                                        checksumfile=temp_dir + '/checksums.dat',
                                                        msg_callback=IcecrustUtils.process_verbose_flag(verbose))
-        if checksum_valid:
-            click.echo('File verified')
-        else:
-            click.echo('ERROR: File cannot be verified!')
-            sys.exit(-1)
+        _process_result(checksum_valid)
     elif verification_mode == VerificationModes.VERIFY_VIA_PGP:
         # Import keys
         if 'keyfile_url' in verification_data:
@@ -150,11 +139,7 @@ def verify(verbose, configfile):
         # Verify the signature first
         verification_result = IcecrustUtils.pgp_verify(gpg, temp_dir + '/file1.dat', temp_dir + '/signature.dat',
                                                        msg_callback=IcecrustUtils.process_verbose_flag(verbose))
-        if verification_result:
-            click.echo('File verified')
-        else:
-            click.echo('ERROR: File cannot be verified!')
-            sys.exit(-1)
+        _process_result(verification_result)
     elif verification_mode == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE:
         # Import keys
         if 'keyfile_url' in verification_data:
@@ -184,11 +169,7 @@ def verify(verbose, configfile):
             checksum_valid = IcecrustUtils.verify_checksum(temp_dir + '/file1.dat', algorithm,
                                                            checksumfile=temp_dir + '/checksums.dat',
                                                            msg_callback=IcecrustUtils.process_verbose_flag(verbose))
-        if verification_result and checksum_valid:
-            click.echo('File verified')
-        else:
-            click.echo('ERROR: File cannot be verified!')
-            sys.exit(-1)
+        _process_result(verification_result and checksum_valid)
     else:
         click.echo("ERROR: Verification mode not supported!")
         sys.exit(-1)
