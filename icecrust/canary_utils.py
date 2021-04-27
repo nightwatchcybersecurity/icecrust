@@ -22,10 +22,24 @@
 # under the License.
 #
 from enum import Enum
-from pathlib import Path
-import enum, pkg_resources, tempfile
+import json, pkg_resources
 
-import click, filehash, gnupg
+from download import download
+import jsonschema
+
+from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
+
+
+# Location of the schema files
+CANARY_INPUT_SCHEMA  = pkg_resources.resource_filename('icecrust', 'data/canary_input.schema.json')
+CANARY_OUTPUT_SCHEMA = pkg_resources.resource_filename('icecrust', 'data/canary_output.schema.json')
+
+# Names of files to be downloaded
+FILENAME_FILE1 = "file1.dat"
+FILENAME_FILE2 = "file1.dat"
+FILENAME_KEYS = "keys.dat"
+FILENAME_CHECKSUM = "checksum.dat"
+FILENAME_SIGNATURE = "signature.dat"
 
 
 # List of available verification modes, based on the command line options in the main CLI class
@@ -37,13 +51,54 @@ class VerificationModes(Enum):
     VERIFY_VIA_PGPCHECKSUMFILE = 'verify_via_pgpchecksumfile'
 
 
-# Location of the schema files
-CANARY_INPUT_SCHEMA  = pkg_resources.resource_filename('icecrust', 'data/canary_input.schema.json')
-CANARY_OUTPUT_SCHEMA = pkg_resources.resource_filename('icecrust', 'data/canary_output.schema.json')
-
-
 class IcecrustCanaryUtils(object):
     """Various utility functions for the canary CLI"""
+    @staticmethod
+    def download_all_files(verification_mode, dir, filename_url, verification_data, msg_callback=None):
+        """
+        Downloads all files needed for processing
+
+        :param verification_mode: verification mode being used
+        :param dir: directory to download to
+        :param filename_url: URL for the main file to be downloaded
+        :param verification_data: parsed JSON containing verification data
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :return: one of VERIFICATION_MODES or None if none are found
+        """
+        # Main file is always downloaded
+        IcecrustCanaryUtils.download_file(filename_url, dir, FILENAME_FILE1, msg_callback=msg_callback)
+
+        # Download comparison file
+        if verification_mode == VerificationModes.COMPARE_FILES:
+            IcecrustCanaryUtils.download_file(verification_data['file2_url'], dir, FILENAME_FILE2,
+                                              msg_callback=msg_callback)
+
+        # Download checksum files
+        if verification_mode in [VerificationModes.VERIFY_VIA_CHECKSUMFILE, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
+            IcecrustCanaryUtils.download_file(verification_data['checksumfile_url'], dir, FILENAME_CHECKSUM,
+                                              msg_callback=msg_callback)
+
+        # Download signature files
+        if verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
+            IcecrustCanaryUtils.download_file(verification_data['signaturefile_url'], dir, FILENAME_SIGNATURE,
+                                              msg_callback=msg_callback)
+
+    @staticmethod
+    def download_file(url, dir, filename, msg_callback=None):
+        """
+        Download the given file to the provided directory
+
+        :param url: URL to download
+        :param directory: directory to download to
+        :param filename: filename to use for download
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :return: one of VERIFICATION_MODES or None if none are found
+        """
+        verbose = False
+        if msg_callback:
+            verbose = True
+        download(url, dir + filename, progressbar=verbose, verbose=verbose)
+
     @staticmethod
     def extract_verification_mode(config, msg_callback=None):
         """
@@ -58,3 +113,68 @@ class IcecrustCanaryUtils(object):
                 return mode
 
         return None
+
+    @staticmethod
+    def get_algorithm(verification_data, msg_callback=None):
+        """
+        Gets algorithm to be used based on verification data
+
+        :param verification_data: parsed JSON containing verification data
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :return: returns algorithm to be used
+        """
+        algorithm = DEFAULT_HASH_ALGORITHM
+        if 'algorithm' in verification_data:
+            algorithm = verification_data['algorithm']
+
+        if msg_callback:
+            msg_callback.echo("Using algorithm: " + algorithm)
+
+        return algorithm
+
+    @staticmethod
+    def import_keys(gpg, dir, verification_data, msg_callback=None):
+        """
+        Import keys if needed
+
+        :param verification_mode: verification mode being used
+        :param dir: directory to download to
+        :param filename_url: URL for the main file to be downloaded
+        :param verification_data: parsed JSON containing verification data
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :return: True if succesful, False if not, None if skipped
+        """
+        keyfile_path = None
+        if 'keyfile_url' in verification_data:
+            keyfile_path = dir + FILENAME_KEYS
+            IcecrustCanaryUtils.download_file(verification_data['keyfile_url'], dir, keyfile_path,
+                                              msg_callback=msg_callback)
+
+        # Do the actual import
+        import_result = IcecrustUtils.pgp_import_keys(gpg, keyfile=keyfile_path,
+                                                      keyid=verification_data['keyid'],
+                                                      keyserver=verification_data['keyserver'],
+                                                      msg_callback=msg_callback)
+        return import_result
+
+    @staticmethod
+    def validate_config_file(config_file, msg_callback=None):
+        """
+        Validates config file against the schema
+
+        :param config: config file stream
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :return: returns parsed JSON if valid, None if not
+        """
+        schema_data = json.load(open(CANARY_INPUT_SCHEMA, 'r'))
+        config_data = json.load(config_file)
+        try:
+            jsonschema.validators.validate(instance=config_data, schema=schema_data,
+                                           format_checker=jsonschema.draft7_format_checker)
+        except jsonschema.exceptions.ValidationError as err:
+            if msg_callback:
+                msg_callback.echo("Config file is not properly formatted!")
+                msg_callback.echo(err.message)
+            return None
+
+        return config_data
