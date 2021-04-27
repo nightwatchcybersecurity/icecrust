@@ -25,13 +25,13 @@ import json, re, shutil
 
 import gnupg, jsonschema, pytest
 
-from icecrust.canary_utils import VerificationModes, CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA
+from icecrust.canary_utils import VerificationModes, CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA, IcecrustCanaryUtils
 
-from test_utils import TEST_DIR, FILE1_HASH, FILE2_HASH
+from test_utils import TEST_DIR, mock_msg_callback
 
 
 # Tests for misc utils methods
-class TestUtils(object):
+class TestCanaryUtils(object):
     def test_const_verification_modes(self):
         assert len(VerificationModes) == 5
         assert VerificationModes['COMPARE_FILES'] is not None
@@ -76,3 +76,32 @@ class TestUtils(object):
                                            format_checker=jsonschema.draft7_format_checker)
 
 
+# Tests for misc utils methods
+class TestValidateConfigFile(object):
+    def test_valid(self):
+        assert IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/compare_pnpm_input.json', 'r')) \
+               is not None
+        assert IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/checksum_pnpm_input.json', 'r')) \
+               is not None
+        assert IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/checksumfile_pnpm_input.json', 'r')) \
+               is not None
+        assert IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pgp_pnpm_input.json', 'r')) \
+               is not None
+        assert IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pgpcheckumfile_pnpm_input.json', 'r')) \
+               is not None
+
+    def test_valid_verbose(self, mock_msg_callback):
+        assert IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/compare_pnpm_input.json', 'r'),
+                                                        msg_callback=mock_msg_callback) is not None
+        assert len(mock_msg_callback.messages) == 0
+
+    def test_invalid(self):
+        assert IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pnpm_output.json', 'r')) \
+               is None
+
+    def test_invalid_verbose(self, mock_msg_callback):
+        assert IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pnpm_output.json', 'r'),
+                                                        msg_callback=mock_msg_callback) is None
+        assert len(mock_msg_callback.messages) == 2
+        assert mock_msg_callback.messages[0] == "Config file is not properly formatted!"
+        assert mock_msg_callback.messages[1] == "'name' is a required property"

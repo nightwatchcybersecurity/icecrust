@@ -21,14 +21,14 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import json, sys, tempfile
+import sys, tempfile
 
-import click, jsonschema
+import click
 
 from icecrust.canary_utils import IcecrustCanaryUtils, VerificationModes
-from icecrust.canary_utils import FILENAME_FILE1, FILENAME_FILE2, FILENAME_KEYS, FILENAME_CHECKSUM, FILENAME_SIGNATURE
+from icecrust.canary_utils import FILENAME_FILE1, FILENAME_FILE2, FILENAME_CHECKSUM, FILENAME_SIGNATURE
 from icecrust.cli import _process_result
-from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
+from icecrust.utils import IcecrustUtils
 
 
 @click.version_option(version=IcecrustUtils.get_version(), prog_name='icecrust_canary')
@@ -54,17 +54,17 @@ def verify(verbose, configfile):
     if config_data is None:
         _process_result(False)
 
-    # Create temporary directory and download file to be checked
-    print('Downloading file: "' + config_data['filename_url'] + '"')
-    temp_dir = str(tempfile.TemporaryDirectory().name)
-    #file_req = download(config['filename_url'], temp_dir + '/file.dat', verbose=verbose, progressbar=verbose)
-
     # Select the right mode
     verification_mode =\
         IcecrustCanaryUtils.extract_verification_mode(config_data, IcecrustUtils.process_verbose_flag(verbose))
     if verification_mode is None:
         click.echo('Unknown verification mode in the config file!')
         _process_result(False)
+
+    # Create temporary directory and download file to be checked
+    print('Downloading file: "' + config_data['filename_url'] + '"')
+    temp_dir = str(tempfile.TemporaryDirectory().name)
+    #file_req = download(config['filename_url'], temp_dir + '/file.dat', verbose=verbose, progressbar=verbose)
 
     # Extract data and output details
     verification_data = config_data[str(verification_mode.value[0])]
