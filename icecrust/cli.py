@@ -25,6 +25,7 @@ import sys
 
 import click
 from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
+from icecrust.canary_utils import VerificationModes
 
 
 @click.version_option(version=IcecrustUtils.get_version(), prog_name='icecrust')

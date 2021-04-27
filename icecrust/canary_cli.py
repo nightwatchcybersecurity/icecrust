@@ -21,13 +21,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import json, sys
+import json, sys, tempfile
 
-import click
+import click, jsonschema
 from download import download
-from jsonschema.validators import validate
 
 from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
+from icecrust.canary_utils import CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA, IcecrustCanaryUtils, VerificationModes
 
 
 @click.version_option(version=IcecrustUtils.get_version(), prog_name='icecrust_canary')
@@ -49,45 +49,149 @@ def cli():
 def verify(verbose, configfile):
     """Does a canary check against a project"""
     # Validate the file against the schema
-    schema_data = json.load(open(INPUT_SCHEMA, 'r'))
-    parsed_data = json.load(open(TEST_DIR + 'canary/pnpm_input.json', 'r'))
-    validate(instance=parsed_data, schema=schema_data)
-
+    schema_data = json.load(open(CANARY_INPUT_SCHEMA, 'r'))
     config = json.load(configfile)
-    print('Checking "' + config['name'] + "', located at '" + config['url'] + "'")
-    print('Verifying file: "' + config['filename_url'] + '"')
-#
-#     # Select the right mode
-#     if config['verification_mode'] == 'checksumverify_with_keyid':
-#         #temp_dir = str(tempfile.TemporaryDirectory().name)
-#         temp_dir = '/Users/yakovsh/Desktop/icecrust/test_data/canary'
-#
-#         # Download the right files
-#         file_req = download(config['filename_url'], temp_dir + '/file.dat')
-#         checksum_req = download(config['checksumfile_url'], temp_dir + '/checksums.dat')
-#         signature_req = download(config['signaturefile_url'], temp_dir + '/signature.dat')
-#
-#         # Verify the checksum file signature first
-#         IcecrustUtils.pgpverify(temp_dir + '/checksums.dat', temp_dir + '/signature.dat', verbose,
-#                    keyid=config['keyid'], keyserver=config['keyserver'])
-#
-#         # Check hash against checksum file
-#         checksum_valid = IcecrustUtils.verify_file_checksum(temp_dir + '/file.dat', temp_dir + '/checksums.dat',
-#                                           config['algorithm'])
-#         if checksum_valid:
-#             click.echo('File checksum verified against the checksums file')
-#         else:
-#             click.echo('ERROR: File checksum cannot be found or verified!')
-#             sys.exit(-1)
-#     elif config['verification_mode'] == 'checksumverify_with_keyfile':
-#         pass
-#     elif config['verification_mode'] == 'pgpverify_with_keyfile':
-#         pass
-#     elif config['verification_mode'] == 'pgpverify_with_keyid':
-#         pass
-#     else:
-#         click.echo('ERROR: Unknown verification mode')
-#         sys.exit(-1)
+    try:
+        jsonschema.validators.validate(instance=config, schema=schema_data,
+                                       format_checker=jsonschema.draft7_format_checker)
+    except jsonschema.exceptions.ValidationError as err:
+        click.echo("Config file is not properly formatted!")
+        if verbose:
+            click.echo(err.message)
+        sys.exit(-1)
+
+    # Create temporary directory and load file
+    print('Downloading file: "' + config['filename_url'] + '"')
+    temp_dir = str(tempfile.TemporaryDirectory().name)
+    #file_req = download(config['filename_url'], temp_dir + '/file.dat', verbose=verbose, progressbar=verbose)
+
+    # Select the right mode
+    verification_mode =\
+        IcecrustCanaryUtils.extract_verification_mode(config, IcecrustUtils.process_verbose_flag(verbose))
+    if verification_mode is None:
+        click.echo('Unknown verification mode in the config file!')
+        sys.exit(-1)
+
+    # Extract data and output details
+    verification_data = config[str(verification_mode.value[0])]
+    print('Using verification mode: ' + str(verification_mode.value[0]))
+    if verbose:
+        click.echo("Verification data: " + str(verification_data))
+
+    # Initialize directory and PGP
+    #temp_dir = str(tempfile.TemporaryDirectory().name)
+    temp_dir = '/Users/yakovsh/Desktop/icecrust/test_data/gpg'
+    gpg = IcecrustUtils.pgp_init(gpg_home_dir=temp_dir)
+
+    # Do the right operation
+    if verification_mode == VerificationModes.COMPARE_FILES:
+        # Download the right files
+        download(config['filename_url'], temp_dir + '/file1.dat', progressbar=verbose, verbose=verbose)
+        download(verification_data['file2_url'], temp_dir + '/file2.dat', progressbar=verbose, verbose=verbose)
+
+        # Compare files
+        compare_result = IcecrustUtils.compare_files(temp_dir + '/file1.dat', temp_dir + '/file2.dat',
+                                                     msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+        if compare_result:
+            click.echo('Files verified')
+        else:
+            click.echo('ERROR: Files cannot be verified!')
+            sys.exit(-1)
+    elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUM:
+        # Download the right files
+        download(config['filename_url'], temp_dir + '/file1.dat', progressbar=verbose, verbose=verbose)
+
+        # Check hash against checksum file
+        algorithm = DEFAULT_HASH_ALGORITHM
+        if 'algorithm' in verification_data:
+            algorithm = verification_data['algorithm']
+        checksum_valid = IcecrustUtils.verify_checksum(temp_dir + '/file1.dat', algorithm,
+                                                       checksum_value=verification_data['checksum_value'],
+                                                       msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+        if checksum_valid:
+            click.echo('File verified')
+        else:
+            click.echo('ERROR: File cannot be verified!')
+            sys.exit(-1)
+    elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUMFILE:
+        # Download the right files
+        download(config['filename_url'], temp_dir + '/file1.dat', progressbar=verbose, verbose=verbose)
+        download(verification_data['checksumfile_url'], temp_dir + '/checksums.dat',
+                 progressbar=verbose, verbose=verbose)
+
+        # Check hash against checksum file
+        algorithm = DEFAULT_HASH_ALGORITHM
+        if 'algorithm' in verification_data:
+            algorithm = verification_data['algorithm']
+        checksum_valid = IcecrustUtils.verify_checksum(temp_dir + '/file1.dat', algorithm,
+                                                       checksumfile=temp_dir + '/checksums.dat',
+                                                       msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+        if checksum_valid:
+            click.echo('File verified')
+        else:
+            click.echo('ERROR: File cannot be verified!')
+            sys.exit(-1)
+    elif verification_mode == VerificationModes.VERIFY_VIA_PGP:
+        # Import keys
+        if 'keyfile_url' in verification_data:
+            download(config['keyfile_url'], temp_dir + '/keys.txt', progressbar=verbose, verbose=verbose)
+            IcecrustUtils.pgp_import_keys(gpg, keyfile=temp_dir + '/keys.txt',
+                                          msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+        else:
+            IcecrustUtils.pgp_import_keys(gpg, keyid=verification_data['keyid'],
+                                          keyserver=verification_data['keyserver'],
+                                          msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+
+        # Download the right files
+        download(config['filename_url'], temp_dir + '/file1.dat', progressbar=verbose, verbose=verbose)
+        download(verification_data['signaturefile_url'], temp_dir + '/signature.dat',
+                 progressbar=verbose, verbose=verbose)
+
+        # Verify the signature first
+        verification_result = IcecrustUtils.pgp_verify(gpg, temp_dir + '/file1.dat', temp_dir + '/signature.dat',
+                                                       msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+        if verification_result:
+            click.echo('File verified')
+        else:
+            click.echo('ERROR: File cannot be verified!')
+            sys.exit(-1)
+    elif verification_mode == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE:
+        # Import keys
+        if 'keyfile_url' in verification_data:
+            download(config['keyfile_url'], temp_dir + '/keys.txt', progressbar=verbose, verbose=verbose)
+            IcecrustUtils.pgp_import_keys(gpg, keyfile=temp_dir + '/keys.txt',
+                                          msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+        else:
+            IcecrustUtils.pgp_import_keys(gpg, keyid=verification_data['keyid'],
+                                          keyserver=verification_data['keyserver'],
+                                          msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+
+        # Download the right files
+        download(config['filename_url'], temp_dir + '/file1.dat', progressbar=verbose, verbose=verbose)
+        download(verification_data['checksumfile_url'], temp_dir + '/checksums.dat',
+                 progressbar=verbose, verbose=verbose)
+        download(verification_data['signaturefile_url'], temp_dir + '/signature.dat',
+                 progressbar=verbose, verbose=verbose)
+
+        # Verify the checksum file signature first
+        verification_result = IcecrustUtils.pgp_verify(gpg, temp_dir + '/checksums.dat', temp_dir + '/signature.dat',
+                                                       msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+        if verification_result:
+            # Check hash against checksum file
+            algorithm = DEFAULT_HASH_ALGORITHM
+            if 'algorithm' in verification_data:
+                algorithm = verification_data['algorithm']
+            checksum_valid = IcecrustUtils.verify_checksum(temp_dir + '/file1.dat', algorithm,
+                                                           checksumfile=temp_dir + '/checksums.dat',
+                                                           msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+        if verification_result and checksum_valid:
+            click.echo('File verified')
+        else:
+            click.echo('ERROR: File cannot be verified!')
+            sys.exit(-1)
+    else:
+        click.echo("ERROR: Verification mode not supported!")
+        sys.exit(-1)
 
 
 if __name__ == '__main__':

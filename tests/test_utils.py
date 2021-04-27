@@ -21,12 +21,11 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import json, pkg_resources, re, shutil
+import json, re, shutil
 
 import gnupg, jsonschema, pytest
 
-from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils,\
-    VERIFICATION_MODES, CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA
+from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 
 # Directory with test data
 TEST_DIR = 'test_data/'
@@ -63,14 +62,6 @@ class TestUtils(object):
     def test_const_default_algorithm(self):
         assert DEFAULT_HASH_ALGORITHM == 'sha256'
 
-    def test_const_verification_modes(self):
-        assert len(VERIFICATION_MODES) == 5
-        assert 'compare_files' in VERIFICATION_MODES
-        assert 'verify_via_checksum' in VERIFICATION_MODES
-        assert 'verify_via_checksumfile' in VERIFICATION_MODES
-        assert 'verify_via_pgp' in VERIFICATION_MODES
-        assert 'verify_via_pgpchecksumfile' in VERIFICATION_MODES
-
     def test_get_version_format_valid(self):
         pattern = re.compile(r'^(\d+\.)?(\d+\.)?(\*|\d+)$')
         assert pattern.match(IcecrustUtils.get_version()) is not None
@@ -78,13 +69,6 @@ class TestUtils(object):
     def test_process_verbose_flag_valid(self):
         assert IcecrustUtils.process_verbose_flag(False) is False
         assert IcecrustUtils.process_verbose_flag(None) is False
-
-    def test_canary_schemas_valid(self):
-        input_schema = json.load(open(CANARY_INPUT_SCHEMA, 'r'))
-        output_schema = json.load(open(CANARY_OUTPUT_SCHEMA, 'r'))
-        jsonschema.Draft7Validator.check_schema(input_schema)
-        jsonschema.Draft7Validator.check_schema(output_schema)
-        assert True
 
 
 # Tests for utils.compare_files()
@@ -324,4 +308,3 @@ class TestUtilsVerifyChecksum(object):
     def test_invalid_missing_arguments1(self):
         with pytest.raises(ValueError):
             IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', DEFAULT_HASH_ALGORITHM)
-

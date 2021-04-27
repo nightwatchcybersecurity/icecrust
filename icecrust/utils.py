@@ -29,19 +29,6 @@ import click, filehash, gnupg
 # Default hash algorithm to use for checksums
 DEFAULT_HASH_ALGORITHM = 'sha256'
 
-# List of available verification modes, based on the command line options in the main CLI class
-VERIFICATION_MODES = [
-    'compare_files',
-    'verify_via_checksum',
-    'verify_via_checksumfile',
-    'verify_via_pgp',
-    'verify_via_pgpchecksumfile'
-]
-
-# Location of the schema files
-CANARY_INPUT_SCHEMA  = pkg_resources.resource_filename('icecrust', 'data/canary_input.schema.json')
-CANARY_OUTPUT_SCHEMA = pkg_resources.resource_filename('icecrust', 'data/canary_output.schema.json')
-
 
 class IcecrustUtils(object):
     """Various utility functions, split off from the main class for ease of unit testing"""
