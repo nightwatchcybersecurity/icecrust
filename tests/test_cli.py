@@ -211,3 +211,38 @@ class TestCliVerifyChecksumFile(object):
         result = runner.invoke(cli, ['verify_via_checksumfile'])
         assert result.exit_code == 2
         assert "Error: Missing argument 'FILENAME'." in result.output
+
+
+# Tests for "verify_via_pgp" option
+class TestCliVerifyPgp(object):
+    def test_invalid_bad_arguments_missing_filename(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ['verify_via_pgp'])
+        assert result.exit_code == 2
+        assert "Error: Missing argument 'FILENAME'." in result.output
+
+    def test_invalid_bad_arguments_missing_signaturefile(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ['verify_via_pgp', TEST_DIR + 'file1.txt'])
+        assert result.exit_code == 2
+        assert "Error: Missing argument 'SIGNATUREFILE'." in result.output
+
+    def test_invalid_bad_arguments_missing_keys(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ['verify_via_pgp', TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt.sig'])
+        assert result.exit_code == 2
+        assert "ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!\n" in result.output
+
+    def test_invalid_bad_arguments_keyid_without_keyserver(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ['verify_via_pgp', TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt.sig',
+                                     '--keyid', 'keyid'])
+        assert result.exit_code == 2
+        assert "ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!\n" in result.output
+
+    def test_invalid_bad_arguments_keyserver_without_keyid(self):
+        runner = CliRunner()
+        result = runner.invoke(cli, ['verify_via_pgp', TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt.sig',
+                                     '--keyserver', 'keyserver'])
+        assert result.exit_code == 2
+        assert "ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!\n" in result.output

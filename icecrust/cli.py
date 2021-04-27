@@ -82,7 +82,6 @@ def verify_via_checksum(verbose, filename, checksum_value, algorithm):
                                                                                case_sensitive=False))
 def verify_via_checksumfile(verbose, filename, checksumfile, algorithm):
     """Verify via a checksums file"""
-    # Check hash and output results
     checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksumfile=checksumfile,
                                                    msg_callback=IcecrustUtils.process_verbose_flag(verbose))
     _process_result(checksum_valid)
@@ -98,7 +97,9 @@ def verify_via_checksumfile(verbose, filename, checksumfile, algorithm):
 def verify_via_pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
     """Verify via a PGP signature"""
     # Check input parameters
-    assert keyfile or (keyid and keyserver)
+    if keyfile is None and (keyid is None or keyserver is None):
+        click.echo("ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!")
+        sys.exit(2)
 
     # Initialize PGP and import keys
     gpg = IcecrustUtils.pgp_init(verbose)
@@ -126,7 +127,9 @@ def verify_via_pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
 def verify_via_pgpchecksumfile(verbose, filename, checksumfile, signaturefile, algorithm, keyfile, keyid, keyserver):
     """Verify via a PGP-signed checksums file"""
     # Check input parameters
-    assert keyfile or (keyid and keyserver)
+    if keyfile is None and (keyid is None or keyserver is None):
+        click.echo("ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!")
+        sys.exit(2)
 
     # Initialize PGP and import keys
     gpg = IcecrustUtils.pgp_init(verbose)
