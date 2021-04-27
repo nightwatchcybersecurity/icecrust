@@ -21,9 +21,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import json, re, shutil
+import re, shutil
 
-import gnupg, jsonschema, pytest
+import gnupg, pytest
 
 from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 

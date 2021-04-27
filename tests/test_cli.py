@@ -43,7 +43,7 @@ class TestCliCompareFiles(object):
         runner = CliRunner()
         result = runner.invoke(cli, ['compare_files', TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt'])
         assert result.exit_code == 0
-        assert result.output == 'Files verified\n'
+        assert result.output == 'File verified\n'
 
     def test_valid_verbose(self):
         runner = CliRunner()
@@ -52,13 +52,13 @@ class TestCliCompareFiles(object):
         assert result.output == \
                'File1 checksum: ' + FILE1_HASH + '\n' + \
                'File2 checksum: ' + FILE1_HASH + '\n' + \
-               'Files verified\n'
+               'File verified\n'
 
     def test_invalid(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['compare_files', TEST_DIR + 'file1.txt', TEST_DIR + 'file2.txt'])
         assert result.exit_code == -1
-        assert result.output == 'ERROR: Files cannot be verified!\n'
+        assert result.output == 'ERROR: File cannot be verified!\n'
 
     def test_invalid_verbose(self):
         runner = CliRunner()
@@ -67,7 +67,7 @@ class TestCliCompareFiles(object):
         assert result.output == \
                'File1 checksum: ' + FILE1_HASH + '\n' + \
                'File2 checksum: ' + FILE2_HASH + '\n' + \
-               'ERROR: Files cannot be verified!\n'
+               'ERROR: File cannot be verified!\n'
 
     def test_invalid_arguments_missing_file1(self):
         runner = CliRunner()

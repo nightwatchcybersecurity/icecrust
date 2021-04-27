@@ -22,7 +22,7 @@
 # under the License.
 #
 from pathlib import Path
-import pkg_resources, tempfile
+import sys, tempfile
 
 import click, filehash, gnupg
 
