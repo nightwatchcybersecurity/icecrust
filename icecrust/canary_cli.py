@@ -62,7 +62,7 @@ def verify(verbose, configfile):
     if verification_mode is None:
         click.echo('Unknown verification mode in the config file!')
         _process_result(False)
-    print('Using verification mode: ' + str(verification_mode.value[0]))
+    print('Using verification mode: ' + verification_mode.name)
 
     # Extract verification data
     verification_data = IcecrustCanaryUtils.extract_verification_data(config_data, verification_mode,
