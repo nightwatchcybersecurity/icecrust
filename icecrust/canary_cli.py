@@ -49,28 +49,29 @@ def cli():
 @click.argument('configfile', required=True, type=click.File('r'))
 def verify(verbose, configfile):
     """Does a canary check against a project"""
+    msg_callback = IcecrustUtils.process_verbose_flag(verbose)
+
     # Validate the config file
-    config_data = IcecrustCanaryUtils.validate_config_file(configfile, IcecrustUtils.process_verbose_flag(verbose))
+    config_data = IcecrustCanaryUtils.validate_config_file(configfile, msg_callback=msg_callback)
     if config_data is None:
         _process_result(False)
 
     # Select the right mode
     verification_mode =\
-        IcecrustCanaryUtils.extract_verification_mode(config_data, IcecrustUtils.process_verbose_flag(verbose))
+        IcecrustCanaryUtils.get_verification_mode(config_data, msg_callback=msg_callback)
     if verification_mode is None:
         click.echo('Unknown verification mode in the config file!')
         _process_result(False)
+    print('Using verification mode: ' + str(verification_mode.value[0]))
+
+    # Extract data and output details
+    verification_data = IcecrustCanaryUtils.extract_verification_data(config_data, verification_mode,
+                                                                      msg_callback=msg_callback)
 
     # Create temporary directory and download file to be checked
     print('Downloading file: "' + config_data['filename_url'] + '"')
     temp_dir = str(tempfile.TemporaryDirectory().name)
     #file_req = download(config['filename_url'], temp_dir + '/file.dat', verbose=verbose, progressbar=verbose)
-
-    # Extract data and output details
-    verification_data = config_data[str(verification_mode.value[0])]
-    print('Using verification mode: ' + str(verification_mode.value[0]))
-    if verbose:
-        click.echo("Verification data: " + str(verification_data))
 
     # Initialize directory and PGP
     #temp_dir = str(tempfile.TemporaryDirectory().name)
@@ -79,12 +80,12 @@ def verify(verbose, configfile):
 
     # Download all of the files required
     IcecrustCanaryUtils.download_all_files(verification_mode, temp_dir, config_data['filename_url'],
-                                           verification_data, msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+                                           verification_data, msg_callback=msg_callback)
 
     # Import keys for those operations that need it
     if verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
-        import_result = IcecrustCanaryUtils.import_keys(gpg, temp_dir, verification_data,
-                                                        msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+        import_result = IcecrustCanaryUtils.import_key_material(gpg, temp_dir, verification_data,
+                                                                msg_callback=msg_callback)
         if import_result is False:
             _process_result(import_result)
 
@@ -92,34 +93,32 @@ def verify(verbose, configfile):
     verification_result = False
     if verification_mode == VerificationModes.COMPARE_FILES:
         verification_result = IcecrustUtils.compare_files(temp_dir + FILENAME_FILE1, temp_dir + FILENAME_FILE2,
-                                                     msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+                                                     msg_callback=msg_callback)
     elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUM:
         algorithm = IcecrustCanaryUtils.get_algorithm(verification_data,
-                                                      msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+                                                      msg_callback=msg_callback)
         verification_result = IcecrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
                                                        checksum_value=verification_data['checksum_value'],
-                                                       msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+                                                       msg_callback=msg_callback)
     elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUMFILE:
-        algorithm = IcecrustCanaryUtils.get_algorithm(verification_data,
-                                                      msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+        algorithm = IcecrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
         verification_result = IcecrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
                                                        checksumfile=temp_dir + FILENAME_CHECKSUM,
-                                                       msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+                                                       msg_callback=msg_callback)
     elif verification_mode == VerificationModes.VERIFY_VIA_PGP:
         verification_result = IcecrustUtils.pgp_verify(gpg, temp_dir + FILENAME_FILE1, temp_dir + FILENAME_SIGNATURE,
-                                                       msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+                                                       msg_callback=msg_callback)
     elif verification_mode == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE:
         # Verify the signature of the checksum file first
         signature_result = IcecrustUtils.pgp_verify(gpg, temp_dir + FILENAME_CHECKSUM, temp_dir + FILENAME_SIGNATURE,
-                                                    msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+                                                    msg_callback=msg_callback)
 
         # Then verify the checksums themselves
         if signature_result:
-            algorithm = IcecrustCanaryUtils.get_algorithm(verification_data,
-                                                          msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+            algorithm = IcecrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
             verification_result = IcecrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
                                                                 checksumfile=temp_dir + FILENAME_CHECKSUM,
-                                                                msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+                                                                msg_callback=msg_callback)
     else:
         click.echo("ERROR: Verification mode not supported!")
         sys.exit(-1)

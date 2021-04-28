@@ -37,7 +37,7 @@ CANARY_OUTPUT_SCHEMA = pkg_resources.resource_filename('icecrust', 'data/canary_
 # Names of files to be downloaded
 FILENAME_FILE1 = "file1.dat"
 FILENAME_FILE2 = "file1.dat"
-FILENAME_KEYS = "keys.dat"
+FILENAME_KEYS = "pgp_keys.txt"
 FILENAME_CHECKSUM = "checksum.dat"
 FILENAME_SIGNATURE = "signature.dat"
 
@@ -83,6 +83,13 @@ class IcecrustCanaryUtils(object):
             IcecrustCanaryUtils.download_file(verification_data['signaturefile_url'], dir, FILENAME_SIGNATURE,
                                               msg_callback=msg_callback)
 
+        # Download key file
+        if verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
+            if 'keyfile_url' in verification_data:
+                IcecrustCanaryUtils.download_file(verification_data['keyfile_url'], dir, dir + FILENAME_KEYS,
+                                                  msg_callback=msg_callback)
+
+
     @staticmethod
     def download_file(url, dir, filename, msg_callback=None):
         """
@@ -100,7 +107,28 @@ class IcecrustCanaryUtils(object):
         download(url, dir + filename, progressbar=verbose, verbose=verbose)
 
     @staticmethod
-    def extract_verification_mode(config, msg_callback=None):
+    def extract_verification_data(config, mode, msg_callback=None):
+        """
+        Extracts verification data from config file
+
+        :param config: parsed JSON config
+        :param mode: verification mode
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :return: verification data or None if not found
+        """
+        verification_data = None
+        if str(mode.value[0]) in config:
+            verification_data = config[str(mode.value[0])]
+        elif str(mode.value) in config:
+            verification_data = config[str(mode.value)]
+
+        if msg_callback and verification_data:
+            msg_callback.echo("Verification data: " + str(verification_data))
+
+        return verification_data
+
+    @staticmethod
+    def get_verification_mode(config, msg_callback=None):
         """
         Extracts the correct verification mode from config file
 
@@ -109,7 +137,7 @@ class IcecrustCanaryUtils(object):
         :return: one of VERIFICATION_MODES or None if none are found
         """
         for mode in VerificationModes:
-            if str(mode.value[0]) in config:
+            if str(mode.value[0]) in config or str(mode.value) in config:
                 return mode
 
         return None
@@ -133,7 +161,7 @@ class IcecrustCanaryUtils(object):
         return algorithm
 
     @staticmethod
-    def import_keys(gpg, dir, verification_data, msg_callback=None):
+    def import_key_material(gpg, dir, verification_data, msg_callback=None):
         """
         Import keys if needed
 
@@ -147,8 +175,6 @@ class IcecrustCanaryUtils(object):
         keyfile_path = None
         if 'keyfile_url' in verification_data:
             keyfile_path = dir + FILENAME_KEYS
-            IcecrustCanaryUtils.download_file(verification_data['keyfile_url'], dir, keyfile_path,
-                                              msg_callback=msg_callback)
 
         # Do the actual import
         import_result = IcecrustUtils.pgp_import_keys(gpg, keyfile=keyfile_path,

@@ -1,0 +1,8 @@
+{
+  "name": "pnpm",
+  "url": "https://pnpm.io/",
+  "filename_url": "https://get.pnpm.io/v6.js",
+  "verify_via_checksum": {
+    "checksum_value": "66e6909849e1c7f0ba9aa5055f0cbc91c776379cb05d7dea796e319cc2cd26f5"
+  }
+}
