@@ -64,18 +64,12 @@ def verify(verbose, configfile):
         _process_result(False)
     print('Using verification mode: ' + str(verification_mode.value[0]))
 
-    # Extract data and output details
+    # Extract verification data
     verification_data = IcecrustCanaryUtils.extract_verification_data(config_data, verification_mode,
                                                                       msg_callback=msg_callback)
 
-    # Create temporary directory and download file to be checked
-    print('Downloading file: "' + config_data['filename_url'] + '"')
+    # Create temporary directory and initialize PGP
     temp_dir = str(tempfile.TemporaryDirectory().name)
-    #file_req = download(config['filename_url'], temp_dir + '/file.dat', verbose=verbose, progressbar=verbose)
-
-    # Initialize directory and PGP
-    #temp_dir = str(tempfile.TemporaryDirectory().name)
-    temp_dir = '/Users/yakovsh/Desktop/icecrust/test_data/gpg'
     gpg = IcecrustUtils.pgp_init(gpg_home_dir=temp_dir)
 
     # Download all of the files required
