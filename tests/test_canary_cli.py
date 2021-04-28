@@ -47,7 +47,7 @@ class TestCanaryVerify(object):
     @pytest.mark.network
     def test_compare_invalid(self, tmp_path):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify', TEST_DIR + 'canary/compare_pnpm_input.json'])
+        result = runner.invoke(cli, ['verify', TEST_DIR + 'canary_input/compare_pnpm_input.json'])
         assert result.exit_code == -1
         assert result.output == 'Using verification mode: COMPARE_FILES\n' + \
                'Downloading file: https://get.pnpm.io/v6.js\n' + \
@@ -56,7 +56,7 @@ class TestCanaryVerify(object):
     @pytest.mark.network
     def test_checksum_valid(self, tmp_path):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify', TEST_DIR + 'canary/checksum_pnpm_input.json'])
+        result = runner.invoke(cli, ['verify', TEST_DIR + 'canary_input/checksum_pnpm_input.json'])
         assert result.exit_code == 0
         assert result.output == 'Using verification mode: VERIFY_VIA_CHECKSUM\n' + \
                'Downloading file: https://get.pnpm.io/v6.js\n' + \
@@ -65,7 +65,7 @@ class TestCanaryVerify(object):
     @pytest.mark.network
     def test_checksumfile_valid(self, tmp_path):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify', TEST_DIR + 'canary/checksumfile_pnpm_input.json'])
+        result = runner.invoke(cli, ['verify', TEST_DIR + 'canary_input/checksumfile_pnpm_input.json'])
         assert result.exit_code == 0
         assert result.output == 'Using verification mode: VERIFY_VIA_CHECKSUMFILE\n' + \
                'Downloading file: https://get.pnpm.io/v6.js\n' + \
@@ -74,7 +74,7 @@ class TestCanaryVerify(object):
     @pytest.mark.network
     def test_pgp_valid(self, tmp_path):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify', TEST_DIR + 'canary/pgp_pnpm_input.json'])
+        result = runner.invoke(cli, ['verify', TEST_DIR + 'canary_input/pgp_pnpm_input.json'])
         assert result.exit_code == 0
         assert result.output == 'Using verification mode: VERIFY_VIA_PGP\n' + \
                'Downloading file: https://get.pnpm.io/SHASUMS256.txt\n' + \
@@ -83,7 +83,7 @@ class TestCanaryVerify(object):
     @pytest.mark.network
     def test_pgpchecksumfile_valid(self, tmp_path):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify', TEST_DIR + 'canary/pgpchecksumfile_pnpm_input.json'])
+        result = runner.invoke(cli, ['verify', TEST_DIR + 'canary_input/pgpchecksumfile_pnpm_input.json'])
         assert result.exit_code == 0
         assert result.output == 'Using verification mode: VERIFY_VIA_PGPCHECKSUMFILE\n' + \
                'Downloading file: https://get.pnpm.io/v6.js\n' + \

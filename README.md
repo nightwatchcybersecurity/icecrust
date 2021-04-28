@@ -106,6 +106,7 @@ You can also send emai to ***research /at/ nightwatchcybersecurity [dot] com***
 ## Wishlist
 - Add more unit tests
 - Add warning checks for when URLs are being served from the same site
+- Add help for all CLI options
 
 ## About the name
 "Ice Crust" or "Ледяная Кора" is a magical spell for mental protection

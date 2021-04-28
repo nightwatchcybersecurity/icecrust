@@ -91,9 +91,9 @@ def verify_via_checksumfile(verbose, filename, checksumfile, algorithm):
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('signaturefile', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.option('--keyfile', required=False, type=click.Path(exists=True, dir_okay=False))
-@click.option('--keyid', required=False)
-@click.option('--keyserver', required=False)
+@click.option('--keyfile', required=False, type=click.Path(exists=True, dir_okay=False), help='File containing PGP keys')
+@click.option('--keyid', required=False, help='PGP key ID')
+@click.option('--keyserver', required=False, help='Domain name of the PGP keyserver')
 def verify_via_pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
     """Verify via a PGP signature"""
     # Check input parameters

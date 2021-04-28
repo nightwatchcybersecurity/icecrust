@@ -25,24 +25,12 @@ import re, shutil
 
 import gnupg, pytest
 
-from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
+from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils, MsgCallback
 
 # Directory with test data
 TEST_DIR = 'test_data/'
 FILE1_HASH = '07fe4d4a25718241af145a93f890eb5469052e251d199d173bd3bd50c3bb4da2'
 FILE2_HASH = 'c6de01eef7b93f5112af99a8754c50fdade4aaa6c85d4ab3fbf9b24d41e0d875'
-
-
-# Fixtures and mock objects
-class MockMsgCallback(object):
-    """
-    Used for mocking message callback methods
-    """
-    def __init__(self):
-        self.messages = []
-
-    def echo(self, message):
-        self.messages.append(message)
 
 
 @pytest.fixture
@@ -54,7 +42,7 @@ def copy_keyring(tmp_path):
 @pytest.fixture
 def mock_msg_callback():
     # Return mock message callback object
-    return MockMsgCallback()
+    return MsgCallback()
 
 
 # Tests for misc utils methods
@@ -70,6 +58,13 @@ class TestUtils(object):
         assert IcecrustUtils.process_verbose_flag(False) is False
         assert IcecrustUtils.process_verbose_flag(None) is False
 
+    def test_MsgCallback(self):
+        msg_callback = MsgCallback()
+        msg_callback.echo('test1')
+        msg_callback.echo('test2')
+        assert len(msg_callback.messages) == 2
+        assert msg_callback.messages[0] == 'test1'
+        assert msg_callback.messages[1] == 'test2'
 
 # Tests for utils.compare_files()
 class TestUtilsCompareFiles(object):
@@ -89,7 +84,9 @@ class TestUtilsCompareFiles(object):
         assert IcecrustUtils.compare_files(TEST_DIR + 'foobar1.txt', TEST_DIR + 'foobar2.txt') is False
 
     def test_valid(self):
-        assert IcecrustUtils.compare_files(TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt') is True
+        json_output = []
+        assert IcecrustUtils.compare_files(TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt', json_output=json_output) is True
+        assert len(json_output) == 0
 
     def test_valid_verbose(self, mock_msg_callback):
         assert IcecrustUtils.compare_files(TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt',
@@ -102,6 +99,7 @@ class TestUtilsCompareFiles(object):
         assert IcecrustUtils.compare_files(TEST_DIR + 'file1.txt', TEST_DIR + 'file2.txt') is False
 
     def test_invalid1_verbose(self, mock_msg_callback):
+        json_output = []
         assert IcecrustUtils.compare_files(TEST_DIR + 'file1.txt', TEST_DIR + 'file2.txt',
                                            msg_callback=mock_msg_callback) is False
         assert len(mock_msg_callback.messages) == 2
@@ -110,6 +108,13 @@ class TestUtilsCompareFiles(object):
 
     def test_invalid2(self):
         assert IcecrustUtils.compare_files(TEST_DIR + 'file2.txt', TEST_DIR + 'file1.txt') is False
+
+    def test_invalid3_json_output(self):
+        json_output = []
+        assert IcecrustUtils.compare_files(TEST_DIR + 'file2.txt', TEST_DIR + 'file1.txt', json_output=json_output) is False
+        assert len(json_output) == 2
+        assert json_output[0] == 'File1 checksum: ' + FILE2_HASH
+        assert json_output[1] == 'File2 checksum: ' + FILE1_HASH
 
 
 # Tests for utils.pgp_import_keys()
@@ -254,12 +259,18 @@ class TestUtilsVerifyChecksum(object):
         assert mock_msg_callback.messages[2] == "[Errno 2] No such file or directory: 'test_data/foobar'"
 
     def test_valid_checksumfile(self):
+        json_output = []
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', DEFAULT_HASH_ALGORITHM,
-                                             checksumfile=TEST_DIR + 'file1.txt.SHA256SUMS') is True
+                                             checksumfile=TEST_DIR + 'file1.txt.SHA256SUMS',
+                                             json_output=json_output) is True
+        assert len(json_output) == 0
 
     def test_valid_checksum(self):
+        json_output = []
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', DEFAULT_HASH_ALGORITHM,
-                                             checksum_value=FILE1_HASH) is True
+                                             checksum_value=FILE1_HASH,
+                                             json_output=json_output) is True
+        assert len(json_output) == 0
 
     def test_valid_checksum_verbose(self, mock_msg_callback):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', DEFAULT_HASH_ALGORITHM,
@@ -281,9 +292,32 @@ class TestUtilsVerifyChecksum(object):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt', DEFAULT_HASH_ALGORITHM,
                                              checksum_value=' ' + FILE1_HASH + ' ') is True
 
+    def test_invalid1_checksum(self):
+        assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt.SHA256SUMS', DEFAULT_HASH_ALGORITHM,
+                                             checksum_value='foobar') is False
+
+    def test_invalid1_checksum_with_json_output(self):
+        json_output = []
+        assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt.SHA256SUMS', DEFAULT_HASH_ALGORITHM,
+                                             checksum_value='foobar', json_output=json_output) is False
+        assert len(json_output) == 3
+        assert json_output[0] == 'Algorithm: sha256'
+        assert json_output[1] == 'File checksum: ca68d23d93b2611b380a57fa076684e1f5fa76d0d6bbd6df00c9aed28347e383'
+        assert json_output[2] == 'Checksum to check against: foobar'
+
     def test_invalid1_checksumfile(self):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt.SHA256SUMS', DEFAULT_HASH_ALGORITHM,
                                              checksumfile=TEST_DIR + 'file1.txt') is False
+
+    def test_invalid1_checksumfile_with_json_output(self):
+        json_output = []
+        assert IcecrustUtils.verify_checksum(TEST_DIR + 'file1.txt.SHA256SUMS', DEFAULT_HASH_ALGORITHM,
+                                             checksumfile=TEST_DIR + 'file1.txt',
+                                             json_output=json_output) is False
+        assert len(json_output) == 3
+        assert json_output[0] == 'Algorithm: sha256'
+        assert json_output[1] == 'File checksum: ca68d23d93b2611b380a57fa076684e1f5fa76d0d6bbd6df00c9aed28347e383'
+        assert json_output[2] == 'No match found in checksum file'
 
     def test_invalid2_checksumfile(self):
         assert IcecrustUtils.verify_checksum(TEST_DIR + 'file2.txt', DEFAULT_HASH_ALGORITHM,

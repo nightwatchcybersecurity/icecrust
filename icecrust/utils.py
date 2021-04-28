@@ -22,12 +22,23 @@
 # under the License.
 #
 from pathlib import Path
-import sys, tempfile
+import tempfile
 
 import click, filehash, gnupg
 
 # Default hash algorithm to use for checksums
 DEFAULT_HASH_ALGORITHM = 'sha256'
+
+
+# Helper objects
+class MsgCallback(object):
+    """Used for message callback methods"""
+    def __init__(self):
+        self.messages = []
+
+    def echo(self, message):
+        """Echos the message to stdout"""
+        self.messages.append(message)
 
 
 class IcecrustUtils(object):
@@ -38,13 +49,14 @@ class IcecrustUtils(object):
         return "0.1.0"
 
     @staticmethod
-    def compare_files(file1, file2, msg_callback=None, ):
+    def compare_files(file1, file2, msg_callback=None, json_output=None):
         """
         Compare files by calculating and comparing SHA-256 hashes
 
         :param file1: First file to compare
         :param file2: Second file to compare
         :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :param json_output: Additional data to be used for JSON output
         :return: True if matches, False if doesn't match
         """
         # Calculate the hashes
@@ -66,6 +78,9 @@ class IcecrustUtils(object):
         if file1_hash == file2_hash:
             return True
         else:
+            if json_output is not None:
+                json_output.append('File1 checksum: ' + file1_hash)
+                json_output.append('File2 checksum: ' + file2_hash)
             return False
 
     @staticmethod
@@ -125,7 +140,7 @@ class IcecrustUtils(object):
             return gnupg.GPG(gnupghome=gpg_home_dir, verbose=verbose)
 
     @staticmethod
-    def pgp_verify(gpg, filename, signaturefile, msg_callback=None):
+    def pgp_verify(gpg, filename, signaturefile, msg_callback=None, json_output=None):
         """
         Verifies a file against its PGP signature
 
@@ -133,6 +148,7 @@ class IcecrustUtils(object):
         :param filename: file to be verified
         :param signaturefile: file containing the PGP signature
         :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :param json_output: Additional data to be used for JSON output
         :return: True if verification was successful, False otherwise
         """
         # Open signature file
@@ -150,7 +166,12 @@ class IcecrustUtils(object):
             msg_callback.echo(verification_result.stderr)
 
         # Return results
-        return verification_result.status == 'signature valid'
+        if verification_result.status == 'signature valid':
+            return True
+        else:
+            if json_output is not None:
+                json_output.append(verification_result.stderr)
+            return False
 
     @staticmethod
     def process_verbose_flag(verbose):
@@ -166,13 +187,15 @@ class IcecrustUtils(object):
             return False
 
     @staticmethod
-    def verify_checksum(filename, algorithm, msg_callback=None, checksum_value=None, checksumfile=None):
+    def verify_checksum(filename, algorithm, msg_callback=None, json_output=None,
+                        checksum_value=None, checksumfile=None):
         """
         Calculates a filename hash and compares against the provided checksum or checksums file
 
         :param filename: Filename used to calculate the hash
         :param algorithm: Algorithm to use for hashing
         :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :param json_output: Additional data to be used for JSON output
         :param checksum_value: Checksum value
         :param checksumfile: Filename of the file containing checksums, follows the format from shasum
         :return: True if matches, False if doesn't match
@@ -200,12 +223,28 @@ class IcecrustUtils(object):
 
         # Compare the checksums and return the result
         if checksum_value:
-            return calculated_hash == checksum_value.lower().strip()
+            if calculated_hash == checksum_value.lower().strip():
+                return True
+            else:
+                if json_output is not None:
+                    json_output.append('Algorithm: ' + algorithm)
+                    json_output.append('File checksum: ' + calculated_hash)
+                    json_output.append('Checksum to check against: ' + checksum_value)
+                return False
         else:
             try:
-                checksums_content = Path(checksumfile).read_text()
+                checksums_content = str(Path(checksumfile).read_bytes())
             except (FileNotFoundError, TypeError) as err:
                 if msg_callback:
                     msg_callback.echo(str(err))
                 return False
-            return calculated_hash in checksums_content
+
+            # Process verification results
+            if calculated_hash in checksums_content:
+                return True
+            else:
+                if json_output is not None:
+                    json_output.append('Algorithm: ' + algorithm)
+                    json_output.append('File checksum: ' + calculated_hash)
+                    json_output.append('No match found in checksum file')
+                return False

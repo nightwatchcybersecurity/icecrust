@@ -1,0 +1,9 @@
+{
+    "name": "pnpm",
+    "url": "https://pnpm.io/",
+    "timestamp": "2021-04-28T22:00:00.978194",
+    "filename_url": "https://get.pnpm.io/v6.js",
+    "verification_mode": "compare_files",
+    "verified": false,
+    "output": "File1 checksum: 66e6909849e1c7f0ba9aa5055f0cbc91c776379cb05d7dea796e319cc2cd26f5, File2 checksum: 17fc95255b70c64ee7a35b48ade0ee1d9270457b960bcdb8a9695f19ae7bed24"
+}

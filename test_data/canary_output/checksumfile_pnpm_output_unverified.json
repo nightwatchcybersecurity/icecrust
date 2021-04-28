@@ -1,0 +1,9 @@
+{
+    "name": "pnpm",
+    "url": "https://pnpm.io/",
+    "timestamp": "2021-04-28T22:00:00.978194",
+    "filename_url": "https://get.pnpm.io/v6.js",
+    "verification_mode": "verify_via_checksumfile",
+    "verified": false,
+    "output": "Algorithm: sha256, File checksum: 66e6909849e1c7f0ba9aa5055f0cbc91c776379cb05d7dea796e319cc2cd26f5, No match found in checksum file"
+}

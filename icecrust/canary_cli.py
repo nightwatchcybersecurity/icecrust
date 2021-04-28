@@ -21,9 +21,11 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import json
+from datetime import datetime
 import sys, tempfile
 
-import click
+import click, dateutil
 
 from icecrust.canary_utils import IcecrustCanaryUtils, VerificationModes
 from icecrust.canary_utils import FILENAME_FILE1, FILENAME_FILE2, FILENAME_CHECKSUM, FILENAME_SIGNATURE
@@ -46,9 +48,12 @@ def cli():
 
 @cli.command('verify')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
+@click.option('--output-json-file', required=False, type=click.File('w'))
 @click.argument('configfile', required=True, type=click.File('r'))
-def verify(verbose, configfile):
+def verify(verbose, configfile, output_json_file):
     """Does a canary check against a project"""
+    # Setup objects to be used
+    json_output = []
     msg_callback = IcecrustUtils.process_verbose_flag(verbose)
 
     # Validate the config file
@@ -91,37 +96,51 @@ def verify(verbose, configfile):
     verification_result = False
     if verification_mode == VerificationModes.COMPARE_FILES:
         verification_result = IcecrustUtils.compare_files(temp_dir + FILENAME_FILE1, temp_dir + FILENAME_FILE2,
-                                                     msg_callback=msg_callback)
+                                                          msg_callback=msg_callback, json_output=json_output)
     elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUM:
-        algorithm = IcecrustCanaryUtils.get_algorithm(verification_data,
-                                                      msg_callback=msg_callback)
+        algorithm = IcecrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
         verification_result = IcecrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
-                                                       checksum_value=verification_data['checksum_value'],
-                                                       msg_callback=msg_callback)
+                                                            checksum_value=verification_data['checksum_value'],
+                                                            msg_callback=msg_callback, json_output=json_output)
     elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUMFILE:
         algorithm = IcecrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
         verification_result = IcecrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
-                                                       checksumfile=temp_dir + FILENAME_CHECKSUM,
-                                                       msg_callback=msg_callback)
+                                                            checksumfile=temp_dir + FILENAME_CHECKSUM,
+                                                            msg_callback=msg_callback, json_output=json_output)
     elif verification_mode == VerificationModes.VERIFY_VIA_PGP:
         verification_result = IcecrustUtils.pgp_verify(gpg, temp_dir + FILENAME_FILE1, temp_dir + FILENAME_SIGNATURE,
-                                                       msg_callback=msg_callback)
+                                                       msg_callback=msg_callback, json_output=json_output)
     elif verification_mode == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE:
         # Verify the signature of the checksum file first
         signature_result = IcecrustUtils.pgp_verify(gpg, temp_dir + FILENAME_CHECKSUM, temp_dir + FILENAME_SIGNATURE,
-                                                    msg_callback=msg_callback)
+                                                    msg_callback=msg_callback, json_output=json_output)
 
         # Then verify the checksums themselves
         if signature_result:
             algorithm = IcecrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
             verification_result = IcecrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
                                                                 checksumfile=temp_dir + FILENAME_CHECKSUM,
-                                                                msg_callback=msg_callback)
+                                                                msg_callback=msg_callback, json_output=json_output)
     else:
         click.echo("ERROR: Verification mode not supported!")
         sys.exit(-1)
 
     # Finish
+    if output_json_file is not None:
+        output_obj = dict()
+        output_obj['name'] = config_data['name']
+        output_obj['url'] = config_data['url']
+        output_obj['timestamp'] = datetime.now().isoformat()
+        output_obj['filename_url'] = config_data['filename_url']
+        output_obj['verification_mode'] = verification_mode.name.lower()
+        output_obj['verified'] = verification_result
+        output_obj['output'] = ', '.join(json_output)
+        json.dump(output_obj, output_json_file, indent=4)
+
+        if verbose:
+            click.echo("JSON output:")
+            click.echo(json.dumps(output_obj, indent=4))
+
     _process_result(verification_result)
 
 

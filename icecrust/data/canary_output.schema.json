@@ -3,6 +3,8 @@
   "type": "object",
   "title": "Output schema for icecrust_canary project - [github.com/nightwatchcybersecurity/icecrust]",
   "required": [
+    "name",
+    "url",
     "timestamp",
     "filename_url",
     "verification_mode",
@@ -10,6 +12,14 @@
     "output"
   ],
   "properties": {
+    "name": { "type": "string", "title": "Name of the project/tool being verified"
+     },
+    "url": {
+      "type": "string",
+      "format": "url",
+      "title": "Project URL",
+      "pattern": "^https://(.*)$"
+     },
     "timestamp": {
       "type": "string",
       "format": "date-time",
