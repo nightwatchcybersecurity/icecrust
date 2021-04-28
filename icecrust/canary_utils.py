@@ -36,7 +36,7 @@ CANARY_OUTPUT_SCHEMA = pkg_resources.resource_filename('icecrust', 'data/canary_
 
 # Names of files to be downloaded
 FILENAME_FILE1 = "file1.dat"
-FILENAME_FILE2 = "file1.dat"
+FILENAME_FILE2 = "file2.dat"
 FILENAME_KEYS = "pgp_keys.txt"
 FILENAME_CHECKSUM = "checksum.dat"
 FILENAME_SIGNATURE = "signature.dat"

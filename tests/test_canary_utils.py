@@ -46,14 +46,36 @@ class TestCanaryUtils(object):
         output_schema = json.load(open(CANARY_OUTPUT_SCHEMA, 'r'))
         jsonschema.Draft7Validator.check_schema(input_schema)
         jsonschema.Draft7Validator.check_schema(output_schema)
-        assert True
 
-    def test_input_schema_valid_file(self):
+    def test_input_schema_valid_file1(self):
         schema_data = json.load(open(CANARY_INPUT_SCHEMA, 'r'))
-        parsed_data = json.load(open(TEST_DIR + 'canary/pnpm_input.json', 'r'))
+        parsed_data = json.load(open(TEST_DIR + 'canary/compare_pnpm_input.json', 'r'))
         jsonschema.validators.validate(instance=parsed_data, schema=schema_data,
                                        format_checker=jsonschema.draft7_format_checker)
-        assert True
+
+    def test_input_schema_valid_file2(self):
+        schema_data = json.load(open(CANARY_INPUT_SCHEMA, 'r'))
+        parsed_data = json.load(open(TEST_DIR + 'canary/checksum_pnpm_input.json', 'r'))
+        jsonschema.validators.validate(instance=parsed_data, schema=schema_data,
+                                       format_checker=jsonschema.draft7_format_checker)
+
+    def test_input_schema_valid_file3(self):
+        schema_data = json.load(open(CANARY_INPUT_SCHEMA, 'r'))
+        parsed_data = json.load(open(TEST_DIR + 'canary/checksumfile_pnpm_input.json', 'r'))
+        jsonschema.validators.validate(instance=parsed_data, schema=schema_data,
+                                       format_checker=jsonschema.draft7_format_checker)
+
+    def test_input_schema_valid_file4(self):
+        schema_data = json.load(open(CANARY_INPUT_SCHEMA, 'r'))
+        parsed_data = json.load(open(TEST_DIR + 'canary/pgp_pnpm_input.json', 'r'))
+        jsonschema.validators.validate(instance=parsed_data, schema=schema_data,
+                                       format_checker=jsonschema.draft7_format_checker)
+
+    def test_input_schema_valid_file5(self):
+        schema_data = json.load(open(CANARY_INPUT_SCHEMA, 'r'))
+        parsed_data = json.load(open(TEST_DIR + 'canary/pgpchecksumfile_pnpm_input.json', 'r'))
+        jsonschema.validators.validate(instance=parsed_data, schema=schema_data,
+                                       format_checker=jsonschema.draft7_format_checker)
 
     def test_input_schema_invalid_file(self):
         schema_data = json.load(open(CANARY_INPUT_SCHEMA, 'r'))
@@ -67,11 +89,10 @@ class TestCanaryUtils(object):
         parsed_data = json.load(open(TEST_DIR + 'canary/pnpm_output.json', 'r'))
         jsonschema.validators.validate(instance=parsed_data, schema=schema_data,
                                        format_checker=jsonschema.draft7_format_checker)
-        assert True
 
     def test_output_schema_invalid_file(self):
         schema_data = json.load(open(CANARY_OUTPUT_SCHEMA, 'r'))
-        parsed_data = json.load(open(TEST_DIR + 'canary/pnpm_input.json', 'r'))
+        parsed_data = json.load(open(TEST_DIR + 'canary/compare_pnpm_input.json', 'r'))
         with pytest.raises(jsonschema.exceptions.ValidationError):
             jsonschema.validators.validate(instance=parsed_data, schema=schema_data,
                                            format_checker=jsonschema.draft7_format_checker)
@@ -93,7 +114,7 @@ class TestExtractVerificationData(object):
         config = IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pgp_pnpm_input.json', 'r'))
         assert IcecrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_PGP) is not None
 
-        config = IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pgpcheckumfile_pnpm_input.json', 'r'))
+        config = IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pgpchecksumfile_pnpm_input.json', 'r'))
         assert IcecrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE)\
                is not None
 
@@ -131,7 +152,7 @@ class TestGetVerificationMode(object):
         config = IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pgp_pnpm_input.json', 'r'))
         assert IcecrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_PGP
 
-        config = IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pgpcheckumfile_pnpm_input.json', 'r'))
+        config = IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pgpchecksumfile_pnpm_input.json', 'r'))
         assert IcecrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE
 
     def test_invalid(self):
@@ -176,7 +197,7 @@ class TestValidateConfigFile(object):
                is not None
         assert IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pgp_pnpm_input.json', 'r')) \
                is not None
-        assert IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pgpcheckumfile_pnpm_input.json', 'r')) \
+        assert IcecrustCanaryUtils.validate_config_file(open(TEST_DIR + 'canary/pgpchecksumfile_pnpm_input.json', 'r')) \
                is not None
 
     def test_valid_verbose(self, mock_msg_callback):
