@@ -1,7 +1,7 @@
 {
   "name": "pnpm",
   "url": "https://pnpm.io/",
-  "filename_url": "https://get.pnpm.io/v6.js",
+  "filename_url": "https://get.pnpm.io/SHASUMS256.txt",
   "verify_via_pgp": {
     "signaturefile_url": "https://get.pnpm.io/SHASUMS256.txt.sig",
     "keyid": "6E67764A55961854",

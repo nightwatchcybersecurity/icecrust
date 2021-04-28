@@ -69,7 +69,8 @@ def verify(verbose, configfile):
                                                                       msg_callback=msg_callback)
 
     # Create temporary directory
-    temp_dir = tempfile.TemporaryDirectory().name
+    temp_dir_obj = tempfile.TemporaryDirectory()
+    temp_dir = temp_dir_obj.name + '/'
 
     # Download all of the files required
     IcecrustCanaryUtils.download_all_files(verification_mode, temp_dir, config_data['filename_url'],
@@ -78,7 +79,7 @@ def verify(verbose, configfile):
     # Import keys for those operations that need it
     if verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
         # Initialize PGP
-        gpg = IcecrustUtils.pgp_init(gpg_home_dir=temp_dir.name)
+        gpg = IcecrustUtils.pgp_init(gpg_home_dir=temp_dir_obj.name)
 
         # Import keys if needed
         import_result = IcecrustCanaryUtils.import_key_material(gpg, temp_dir, verification_data,
