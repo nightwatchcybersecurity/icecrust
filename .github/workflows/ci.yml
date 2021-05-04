@@ -12,28 +12,35 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v1
+    - name: Checkout code
+      uses: actions/checkout@v1
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - uses: knicknic/os-specific-run@v1.0.3
+
     - name: Install OS-level dependencies
+      uses: knicknic/os-specific-run@v1.0.3
       with:
         macos: brew install gnupg
         linux: sudo apt-get install gnupg
+
     - name: Install Python dependencies
       run: |
         pip install codecov
         pip install -r requirements.txt
+
     - name: Run unit tests
       run: |
         python -m pytest --cov=icecrust/ --cov-report=xml
         codecov
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
+
     - name: Test package build and install
       run: |
         python setup.py install
