@@ -20,18 +20,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install OS-level dependencies
-      uses: knicknic/os-specific-run@v1.0.3
-      with:
-        linux: |
-          sudo apt-get install gnupg
-          gpg --version
-        macos: |
-          brew install gnupg
-          gpg --version
-
-    - name: Install Python dependencies
+    - name: Install dependencies
       run: |
+        gpg --version
         pip install codecov
         pip install -r requirements.txt
 
