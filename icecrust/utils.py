@@ -49,14 +49,14 @@ class IcecrustUtils(object):
         return "0.1.0"
 
     @staticmethod
-    def compare_files(file1, file2, msg_callback=None, json_output=None):
+    def compare_files(file1, file2, msg_callback=None, cmd_output=None):
         """
         Compare files by calculating and comparing SHA-256 hashes
 
         :param file1: First file to compare
         :param file2: Second file to compare
         :param msg_callback: message callback object, can be used to collect additional data via .echo()
-        :param json_output: Additional data to be used for JSON output
+        :param cmd_output: Additional data to be used for JSON output
         :return: True if matches, False if doesn't match
         """
         # Calculate the hashes
@@ -78,9 +78,9 @@ class IcecrustUtils(object):
         if file1_hash == file2_hash:
             return True
         else:
-            if json_output is not None:
-                json_output.append('File1 checksum: ' + file1_hash)
-                json_output.append('File2 checksum: ' + file2_hash)
+            if cmd_output is not None:
+                cmd_output.append('File1 checksum: ' + file1_hash)
+                cmd_output.append('File2 checksum: ' + file2_hash)
             return False
 
     @staticmethod
@@ -140,7 +140,7 @@ class IcecrustUtils(object):
             return gnupg.GPG(gnupghome=gpg_home_dir, verbose=verbose)
 
     @staticmethod
-    def pgp_verify(gpg, filename, signaturefile, msg_callback=None, json_output=None):
+    def pgp_verify(gpg, filename, signaturefile, msg_callback=None, cmd_output=None):
         """
         Verifies a file against its PGP signature
 
@@ -148,7 +148,7 @@ class IcecrustUtils(object):
         :param filename: file to be verified
         :param signaturefile: file containing the PGP signature
         :param msg_callback: message callback object, can be used to collect additional data via .echo()
-        :param json_output: Additional data to be used for JSON output
+        :param cmd_output: Additional data to be used for JSON output
         :return: True if verification was successful, False otherwise
         """
         # Open signature file
@@ -169,8 +169,8 @@ class IcecrustUtils(object):
         if verification_result.status == 'signature valid':
             return True
         else:
-            if json_output is not None:
-                json_output.append(verification_result.stderr)
+            if cmd_output is not None:
+                cmd_output.append(verification_result.stderr)
             return False
 
     @staticmethod
@@ -187,7 +187,7 @@ class IcecrustUtils(object):
             return False
 
     @staticmethod
-    def verify_checksum(filename, algorithm, msg_callback=None, json_output=None,
+    def verify_checksum(filename, algorithm, msg_callback=None, cmd_output=None,
                         checksum_value=None, checksumfile=None):
         """
         Calculates a filename hash and compares against the provided checksum or checksums file
@@ -195,7 +195,7 @@ class IcecrustUtils(object):
         :param filename: Filename used to calculate the hash
         :param algorithm: Algorithm to use for hashing
         :param msg_callback: message callback object, can be used to collect additional data via .echo()
-        :param json_output: Additional data to be used for JSON output
+        :param cmd_output: Additional data to be used for JSON output
         :param checksum_value: Checksum value
         :param checksumfile: Filename of the file containing checksums, follows the format from shasum
         :return: True if matches, False if doesn't match
@@ -226,10 +226,10 @@ class IcecrustUtils(object):
             if calculated_hash == checksum_value.lower().strip():
                 return True
             else:
-                if json_output is not None:
-                    json_output.append('Algorithm: ' + algorithm)
-                    json_output.append('File checksum: ' + calculated_hash)
-                    json_output.append('Checksum to check against: ' + checksum_value)
+                if cmd_output is not None:
+                    cmd_output.append('Algorithm: ' + algorithm)
+                    cmd_output.append('File checksum: ' + calculated_hash)
+                    cmd_output.append('Checksum to check against: ' + checksum_value)
                 return False
         else:
             try:
@@ -243,8 +243,8 @@ class IcecrustUtils(object):
             if calculated_hash in checksums_content:
                 return True
             else:
-                if json_output is not None:
-                    json_output.append('Algorithm: ' + algorithm)
-                    json_output.append('File checksum: ' + calculated_hash)
-                    json_output.append('No match found in checksum file')
+                if cmd_output is not None:
+                    cmd_output.append('Algorithm: ' + algorithm)
+                    cmd_output.append('File checksum: ' + calculated_hash)
+                    cmd_output.append('No match found in checksum file')
                 return False

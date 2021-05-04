@@ -21,11 +21,14 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from datetime import datetime
 from enum import Enum
+from io import StringIO
+from pathlib import Path
 import json, pkg_resources
 
 from download import download
-import jsonschema
+import jsonschema, tzlocal, yaml
 
 from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 
@@ -41,6 +44,8 @@ FILENAME_KEYS = "pgp_keys.txt"
 FILENAME_CHECKSUM = "checksum.dat"
 FILENAME_SIGNATURE = "signature.dat"
 
+# Date format used by Javascript, used for UppTime files
+JAVASCRIPT_DATETIME_FORMAT = "%a %b %d %Y %H:%M:%S %Z%z"
 
 # List of available verification modes, based on the command line options in the main CLI class
 class VerificationModes(Enum):
@@ -127,6 +132,77 @@ class IcecrustCanaryUtils(object):
             msg_callback.echo("Verification data: " + str(verification_data))
 
         return verification_data
+
+    @staticmethod
+    def generate_json(config_data, verification_mode, verification_result, cmd_output, msg_callback=None):
+        """
+        Generates the JSON object for output file
+
+        :param config_data: parsed JSON config
+        :param verification_mode: verification mode used
+        :param verification_result: verification result
+        :param cmd_output: command output
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :return: JSON object as string
+        """
+        output_obj = dict()
+        output_obj['name'] = config_data['name']
+        output_obj['url'] = config_data['url']
+        output_obj['timestamp'] = datetime.now(tzlocal.get_localzone()).isoformat()
+        output_obj['filename_url'] = config_data['filename_url']
+        output_obj['verification_mode'] = verification_mode.name.lower()
+        output_obj['verified'] = verification_result
+        output_obj['output'] = ', '.join(cmd_output)
+        json_data = json.dumps(output_obj, indent=4)
+
+        if msg_callback:
+            msg_callback.echo("--- JSON output ---")
+            msg_callback.echo(json_data)
+        return json_data
+
+    @staticmethod
+    def generate_upptime(output_upptime_file, config_data, verification_result, msg_callback=None):
+        """
+        Generate the upptime object for output file
+
+        :param output_upptime_file: existing upptime file
+        :param config_data: parsed JSON config
+        :param verification_result: verification result
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :return: generated YAML as a string
+        """
+        # If file exists, try to parse start time
+        start_time = datetime.now(tzlocal.get_localzone())
+        if Path(output_upptime_file).exists():
+            parsed_yaml = yaml.safe_load(open(output_upptime_file, 'r'))
+            datestr = parsed_yaml['startTime']
+            # Take out () in the end of the string since it is not supported by datetime
+            if '(' in datestr:
+                datestr = datestr.split('(')[0].strip()
+            start_time = datetime.strptime(datestr, JAVASCRIPT_DATETIME_FORMAT)
+
+        # Generate main object
+        output_obj = dict()
+        output_obj['url'] = config_data['url']
+        output_obj['status'] = 'up' if verification_result else 'down'
+        output_obj['code'] = 200 if verification_result else 0
+        output_obj['responseTime'] = 500 if verification_result else 0
+        output_obj['lastUpdated'] = datetime.now(tzlocal.get_localzone()).isoformat()
+        output_obj['startTime'] = start_time.strftime(JAVASCRIPT_DATETIME_FORMAT)
+        output_obj['generator'] = 'icecrust ' + IcecrustUtils.get_version() + \
+                                  ' <https://github.com/nightwatchcybersecurity/icecrust>'
+
+        # Convert to string
+        stream = StringIO()
+        yaml.dump(output_obj, stream, sort_keys=False)
+        yaml_data = stream.getvalue()
+        # Workaround for pyyaml putting in "'" around date strings
+        yaml_data = yaml_data.replace("'", "")
+
+        if msg_callback:
+            msg_callback.echo("--- UppTime output ---")
+            msg_callback.echo(yaml_data)
+        return yaml_data
 
     @staticmethod
     def get_verification_mode(config, msg_callback=None):

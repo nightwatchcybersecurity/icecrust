@@ -21,11 +21,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import json, re, shutil
+from datetime import datetime
+from io import StringIO
+import json
 
 import jsonschema, pytest
+import yaml
 
-from icecrust.canary_utils import VerificationModes, CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA, DEFAULT_HASH_ALGORITHM
+from icecrust.canary_utils import\
+    VerificationModes, CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA, DEFAULT_HASH_ALGORITHM, JAVASCRIPT_DATETIME_FORMAT
 from icecrust.canary_utils import IcecrustUtils, IcecrustCanaryUtils
 
 from test_utils import TEST_DIR, mock_msg_callback
@@ -135,6 +139,70 @@ class TestExtractVerificationData(object):
         assert IcecrustCanaryUtils.extract_verification_data(config, VerificationModes.COMPARE_FILES,
                                                              msg_callback=mock_msg_callback) is None
         assert len(mock_msg_callback.messages) == 0
+
+
+# Tests for generate_json method
+class TestGenerateJson(object):
+    def test_valid(self):
+        config_data = dict()
+        config_data['name'] = 'foobar1'
+        config_data['url'] = 'https://www.example.com'
+        config_data['filename_url'] = 'https://www.example.com/file.sh'
+        verification_mode = VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE
+        verified_result = False
+        cmd_output = ['foobar2', 'foobar3']
+        json_raw = IcecrustCanaryUtils.generate_json(config_data, verification_mode, verified_result, cmd_output)
+        json_parsed = json.loads(json_raw)
+
+        schema_data = json.load(open(CANARY_OUTPUT_SCHEMA, 'r'))
+        jsonschema.validators.validate(instance=json_parsed, schema=schema_data,
+                                       format_checker=jsonschema.draft7_format_checker)
+
+        assert(json_parsed['name']) == config_data['name']
+        assert(json_parsed['url']) == config_data['url']
+        assert(json_parsed['filename_url']) == config_data['filename_url']
+        assert(json_parsed['verification_mode']) == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE.value
+        assert (json_parsed['verified']) == verified_result
+        assert (json_parsed['output']) == ', '.join(cmd_output)
+
+
+# Tests for generate_upptime method
+class TestGenerateUppTime(object):
+    def test_valid_verification_failed(self):
+        config_data = dict()
+        config_data['url'] = 'https://www.example.com'
+        verified_result = False
+        yaml_raw = IcecrustCanaryUtils.generate_upptime('rwar', config_data, verified_result)
+
+        stream = StringIO(yaml_raw)
+        yaml_parsed = yaml.load(stream)
+
+        assert yaml_parsed['url'] == config_data['url']
+        assert yaml_parsed['status'] == 'down'
+        assert yaml_parsed['code'] == 0
+        assert yaml_parsed['responseTime'] == 0
+        assert type(yaml_parsed['lastUpdated']) == datetime
+        assert type(datetime.strptime(yaml_parsed['startTime'], JAVASCRIPT_DATETIME_FORMAT)) == datetime
+        assert yaml_parsed['generator'] == 'icecrust ' + IcecrustUtils.get_version() + \
+               ' <https://github.com/nightwatchcybersecurity/icecrust>'
+
+    def test_valid_verification_passed(self):
+        config_data = dict()
+        config_data['url'] = 'https://www.example.com'
+        verified_result = True
+        yaml_raw = IcecrustCanaryUtils.generate_upptime('rwar', config_data, verified_result)
+
+        stream = StringIO(yaml_raw)
+        yaml_parsed = yaml.load(stream)
+
+        assert yaml_parsed['url'] == config_data['url']
+        assert yaml_parsed['status'] == 'up'
+        assert yaml_parsed['code'] == 200
+        assert yaml_parsed['responseTime'] == 500
+        assert type(yaml_parsed['lastUpdated']) == datetime
+        assert type(datetime.strptime(yaml_parsed['startTime'], JAVASCRIPT_DATETIME_FORMAT)) == datetime
+        assert yaml_parsed['generator'] == 'icecrust ' + IcecrustUtils.get_version() + \
+               ' <https://github.com/nightwatchcybersecurity/icecrust>'
 
 
 # Tests for get_verification_mode method
