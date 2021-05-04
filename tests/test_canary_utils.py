@@ -29,7 +29,7 @@ from icecrust.canary_utils import\
     VerificationModes, CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA, DEFAULT_HASH_ALGORITHM
 from icecrust.canary_utils import IcecrustCanaryUtils
 
-from test_utils import TEST_DIR
+from test_utils import mock_msg_callback, TEST_DIR
 
 
 # Tests for misc utils methods
