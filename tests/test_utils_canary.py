@@ -25,9 +25,9 @@ import json
 
 import jsonschema, pytest
 
-from icecrust.canary_utils import\
+from icecrust.utils_canary import\
     VerificationModes, CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA, DEFAULT_HASH_ALGORITHM
-from icecrust.canary_utils import IcecrustCanaryUtils
+from icecrust.utils_canary import IcecrustCanaryUtils
 
 from test_utils import mock_msg_callback, TEST_DIR
 

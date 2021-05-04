@@ -20,7 +20,6 @@ setup(
     entry_points={
         'console_scripts': [
             'icecrust = icecrust.cli:cli'
-            'icecrust_canary = icecrust.canary_cli:cli'
         ]
     },
     classifiers=[
