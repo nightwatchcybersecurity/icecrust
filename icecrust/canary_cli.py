@@ -21,12 +21,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from datetime import datetime
-from io import StringIO
-from pathlib import Path
-import json, sys, tempfile
+import sys, tempfile
 
-import click, yaml, tzlocal
+import click
 
 from icecrust.canary_utils import IcecrustCanaryUtils, VerificationModes
 from icecrust.canary_utils import FILENAME_FILE1, FILENAME_FILE2, FILENAME_CHECKSUM, FILENAME_SIGNATURE
@@ -50,7 +47,6 @@ def cli():
 @cli.command('verify')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.option('--output-json-file', required=False, type=click.Path(dir_okay=False, exists=False))
-@click.option('--output-upptime-file', required=False, type=click.Path(dir_okay=False, exists=False))
 @click.argument('configfile', required=True, type=click.File('r'))
 def verify(verbose, configfile, output_json_file, output_upptime_file):
     """Does a canary check against a project"""
@@ -134,14 +130,6 @@ def verify(verbose, configfile, output_json_file, output_upptime_file):
         output_json_stream = open(output_json_file, "w")
         output_json_stream.write(json_data)
         output_json_stream.close()
-
-    # Generate/update the UppTime if needed
-    if output_upptime_file is not None:
-        yaml_data = IcecrustCanaryUtils.generate_upptime(output_upptime_file, config_data, verification_result,
-                                                         msg_callback)
-        output_upptime_stream = open(output_upptime_file, "w")
-        output_upptime_stream.write(yaml_data)
-        output_upptime_stream.close()
 
     _process_result(verification_result)
 

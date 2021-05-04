@@ -21,18 +21,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from datetime import datetime
-from io import StringIO
 import json
 
 import jsonschema, pytest
-import yaml
 
 from icecrust.canary_utils import\
-    VerificationModes, CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA, DEFAULT_HASH_ALGORITHM, JAVASCRIPT_DATETIME_FORMAT
-from icecrust.canary_utils import IcecrustUtils, IcecrustCanaryUtils
+    VerificationModes, CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA, DEFAULT_HASH_ALGORITHM
+from icecrust.canary_utils import IcecrustCanaryUtils
 
-from test_utils import TEST_DIR, mock_msg_callback
+from test_utils import TEST_DIR
 
 
 # Tests for misc utils methods
@@ -164,64 +161,6 @@ class TestGenerateJson(object):
         assert(json_parsed['verification_mode']) == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE.value
         assert (json_parsed['verified']) == verified_result
         assert (json_parsed['output']) == ', '.join(cmd_output)
-
-
-# Tests for generate_upptime method
-class TestGenerateUppTime(object):
-    def test_valid_verification_failed(self):
-        config_data = dict()
-        config_data['url'] = 'https://www.example.com'
-        verified_result = False
-        yaml_raw = IcecrustCanaryUtils.generate_upptime('rwar', config_data, verified_result)
-
-        stream = StringIO(yaml_raw)
-        yaml_parsed = yaml.load(stream)
-
-        assert yaml_parsed['url'] == config_data['url']
-        assert yaml_parsed['status'] == 'down'
-        assert yaml_parsed['code'] == 0
-        assert yaml_parsed['responseTime'] == 0
-        assert type(yaml_parsed['lastUpdated']) == datetime
-        assert type(datetime.strptime(yaml_parsed['startTime'], JAVASCRIPT_DATETIME_FORMAT)) == datetime
-        assert yaml_parsed['generator'] == 'icecrust ' + IcecrustUtils.get_version() + \
-               ' <https://github.com/nightwatchcybersecurity/icecrust>'
-
-    def test_valid_verification_passed(self):
-        config_data = dict()
-        config_data['url'] = 'https://www.example.com'
-        verified_result = True
-        yaml_raw = IcecrustCanaryUtils.generate_upptime('rwar', config_data, verified_result)
-
-        stream = StringIO(yaml_raw)
-        yaml_parsed = yaml.load(stream)
-
-        assert yaml_parsed['url'] == config_data['url']
-        assert yaml_parsed['status'] == 'up'
-        assert yaml_parsed['code'] == 200
-        assert yaml_parsed['responseTime'] == 500
-        assert type(yaml_parsed['lastUpdated']) == datetime
-        assert type(datetime.strptime(yaml_parsed['startTime'], JAVASCRIPT_DATETIME_FORMAT)) == datetime
-        assert yaml_parsed['generator'] == 'icecrust ' + IcecrustUtils.get_version() + \
-               ' <https://github.com/nightwatchcybersecurity/icecrust>'
-
-    def test_valid_verification_passed_existing_file(self):
-        config_data = dict()
-        config_data['url'] = 'https://www.example.com'
-        verified_result = True
-        yaml_raw = IcecrustCanaryUtils.generate_upptime(TEST_DIR + 'canary_upptime/file1.yml',
-                                                        config_data, verified_result)
-
-        stream = StringIO(yaml_raw)
-        yaml_parsed = yaml.load(stream)
-
-        assert yaml_parsed['url'] == config_data['url']
-        assert yaml_parsed['status'] == 'up'
-        assert yaml_parsed['code'] == 200
-        assert yaml_parsed['responseTime'] == 500
-        assert type(yaml_parsed['lastUpdated']) == datetime
-        assert yaml_parsed['startTime'] == 'Mon Aug 10 2020 07:54:43 GMT+0000'
-        assert yaml_parsed['generator'] == 'icecrust ' + IcecrustUtils.get_version() + \
-               ' <https://github.com/nightwatchcybersecurity/icecrust>'
 
 
 # Tests for get_verification_mode method

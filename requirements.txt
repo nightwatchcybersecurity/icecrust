@@ -6,7 +6,6 @@ click>=7.1.2
 filehash>=0.1.dev5
 jsonschema>=3.2.0
 requests>=2.24
-pyyaml>=5.3.1
 python-gnupg>=0.4.7
 tzlocal>=2.1
 

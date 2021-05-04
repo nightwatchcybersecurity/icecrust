@@ -21,16 +21,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import json
-
 from click.testing import CliRunner
-import jsonschema, pytest
+import pytest
 
 from icecrust.canary_cli import cli
 from icecrust.utils import IcecrustUtils
-from icecrust.canary_utils import CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA
 
-from test_utils import TEST_DIR, FILE1_HASH, FILE2_HASH
+from test_utils import TEST_DIR
 
 
 # Tests for CLI class
