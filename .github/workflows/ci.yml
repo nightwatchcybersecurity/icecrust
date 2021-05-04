@@ -23,8 +23,12 @@ jobs:
     - name: Install OS-level dependencies
       uses: knicknic/os-specific-run@v1.0.3
       with:
-        macos: brew install gnupg
-        linux: sudo apt-get install gnupg
+        linux: |
+          sudo apt-get install gnupg
+          gpg --version
+        macos: |
+          brew install gnupg
+          gpg --version
 
     - name: Install Python dependencies
       run: |
