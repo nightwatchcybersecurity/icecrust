@@ -135,9 +135,9 @@ class IcecrustUtils(object):
         # Setup GPG
         if gpg_home_dir is None:
             temp_dir = tempfile.TemporaryDirectory()
-            return gnupg.GPG(gnupghome=temp_dir.name, verbose=verbose)
+            return gnupg.GPG(gnupghome=str(temp_dir.name), verbose=verbose)
         else:
-            return gnupg.GPG(gnupghome=gpg_home_dir, verbose=verbose)
+            return gnupg.GPG(gnupghome=str(gpg_home_dir), verbose=verbose)
 
     @staticmethod
     def pgp_verify(gpg, filename, signaturefile, msg_callback=None, cmd_output=None):

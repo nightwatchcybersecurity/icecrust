@@ -21,6 +21,8 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+import os
+
 from click.testing import CliRunner
 
 from icecrust.cli import cli
@@ -41,13 +43,15 @@ class TestCliVersion(object):
 class TestCliCompareFiles(object):
     def test_valid(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['compare_files', TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt'])
+        result = runner.invoke(cli, ['compare_files', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt')])
         assert result.exit_code == 0
         assert result.output == 'File verified\n'
 
     def test_valid_verbose(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['compare_files', '--verbose', TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt'])
+        result = runner.invoke(cli, ['compare_files', '--verbose', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt')])
         assert result.exit_code == 0
         assert result.output == \
                'File1 checksum: ' + FILE1_HASH + '\n' + \
@@ -56,13 +60,15 @@ class TestCliCompareFiles(object):
 
     def test_invalid(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['compare_files', TEST_DIR + 'file1.txt', TEST_DIR + 'file2.txt'])
+        result = runner.invoke(cli, ['compare_files', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file2.txt')])
         assert result.exit_code == -1
         assert result.output == 'ERROR: File cannot be verified!\n'
 
     def test_invalid_verbose(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['compare_files', '--verbose', TEST_DIR + 'file1.txt', TEST_DIR + 'file2.txt'])
+        result = runner.invoke(cli, ['compare_files', '--verbose', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file2.txt')])
         assert result.exit_code == -1
         assert result.output == \
                'File1 checksum: ' + FILE1_HASH + '\n' + \
@@ -77,7 +83,7 @@ class TestCliCompareFiles(object):
 
     def test_invalid_arguments_missing_file2(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['compare_files', TEST_DIR + 'file1.txt'])
+        result = runner.invoke(cli, ['compare_files', os.path.join(TEST_DIR, 'file1.txt')])
         assert result.exit_code == 2
         assert "Error: Missing argument 'FILE2'" in result.output
 
@@ -89,7 +95,7 @@ class TestCliCompareFiles(object):
 
     def test_invalid_file2_doesnt_exist(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['compare_files', TEST_DIR + 'file1.txt', 'foobar.txt'])
+        result = runner.invoke(cli, ['compare_files', os.path.join(TEST_DIR, 'file1.txt'), 'foobar.txt'])
         assert result.exit_code == 2
         assert "Error: Invalid value for 'FILE2': File 'foobar.txt' does not exist." in result.output
 
@@ -99,20 +105,22 @@ class TestCliVerifyChecksum(object):
     def test_valid(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksum', '--algorithm', 'sha256',
-                                     TEST_DIR + 'file1.txt', '--checksum_value', FILE1_HASH])
+                                     os.path.join(TEST_DIR, 'file1.txt'), '--checksum_value', FILE1_HASH])
         assert result.exit_code == 0
         assert result.output == 'File verified\n'
 
     def test_valid_default_algorithm(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_checksum', TEST_DIR + 'file1.txt', '--checksum_value', FILE1_HASH])
+        result = runner.invoke(cli, ['verify_via_checksum', os.path.join(TEST_DIR, 'file1.txt'),
+                                     '--checksum_value', FILE1_HASH])
         assert result.exit_code == 0
         assert result.output == 'File verified\n'
 
     def test_valid_verbose(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksum',
-                                     '--verbose', TEST_DIR + 'file1.txt', '--checksum_value', FILE1_HASH])
+                                     '--verbose', os.path.join(TEST_DIR, 'file1.txt'),
+                                     '--checksum_value', FILE1_HASH])
         assert result.exit_code == 0
         assert result.output == 'Algorithm: sha256\n' + \
                'File hash: ' + FILE1_HASH + '\n' + \
@@ -120,14 +128,15 @@ class TestCliVerifyChecksum(object):
 
     def test_invalid(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_checksum', TEST_DIR + 'file1.txt', '--checksum_value', FILE2_HASH])
+        result = runner.invoke(cli, ['verify_via_checksum', os.path.join(TEST_DIR, 'file1.txt'),
+                                     '--checksum_value', FILE2_HASH])
         assert result.exit_code == -1
         assert result.output == 'ERROR: File cannot be verified!\n'
 
     def test_invalid_wrong_algorithm_verbose(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksum', '--algorithm', 'sha1', '--verbose',
-                                     TEST_DIR + 'file1.txt', '--checksum_value', FILE2_HASH])
+                                     os.path.join(TEST_DIR, 'file1.txt'), '--checksum_value', FILE2_HASH])
         assert result.exit_code == -1
         assert result.output == 'Algorithm: sha1\n' + \
                'File hash: 4045ed3c779e3b27760e4da357279508a8452dcb\n' + \
@@ -136,13 +145,13 @@ class TestCliVerifyChecksum(object):
     def test_invalid_bad_arguments_invalid_algorithm(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksum', '--algorithm', 'foobar',
-                                     TEST_DIR + 'file1.txt', '--checksum_value', FILE2_HASH])
+                                     os.path.join(TEST_DIR, 'file1.txt'), '--checksum_value', FILE2_HASH])
         assert result.exit_code == 2
         assert "Error: Invalid value for '--algorithm': invalid choice: foobar." in result.output
 
     def test_invalid_bad_arguments_missing_checksum(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_checksum', TEST_DIR + 'file1.txt'])
+        result = runner.invoke(cli, ['verify_via_checksum', os.path.join(TEST_DIR, 'file1.txt')])
         assert result.exit_code == 2
         assert "Error: Missing option '--checksum_value'." in result.output
 
@@ -158,21 +167,24 @@ class TestCliVerifyChecksumFile(object):
     def test_valid(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksumfile', '--algorithm', 'sha256',
-                                     TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt.SHA256SUMS'])
+                                     os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS')])
         assert result.exit_code == 0
         assert result.output == 'File verified\n'
 
     def test_valid_default_algorithm(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksumfile',
-                                     TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt.SHA256SUMS'])
+                                     os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS')])
         assert result.exit_code == 0
         assert result.output == 'File verified\n'
 
     def test_valid_verbose(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksumfile', '--verbose',
-                                     TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt.SHA256SUMS'])
+                                     os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS')])
         assert result.exit_code == 0
         assert result.output == 'Algorithm: sha256\n' + \
                'File hash: ' + FILE1_HASH + '\n' + \
@@ -180,14 +192,16 @@ class TestCliVerifyChecksumFile(object):
 
     def test_invalid(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_checksumfile', TEST_DIR + 'file1.txt', TEST_DIR + 'file2.txt'])
+        result = runner.invoke(cli, ['verify_via_checksumfile', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file2.txt')])
         assert result.exit_code == -1
         assert result.output == 'ERROR: File cannot be verified!\n'
 
     def test_invalid_wrong_algorithm_verbose(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksumfile', '--algorithm', 'sha1', '--verbose',
-                                     TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt.SHA256SUMS'])
+                                     os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS')])
         assert result.exit_code == -1
         assert result.output == 'Algorithm: sha1\n' + \
                'File hash: 4045ed3c779e3b27760e4da357279508a8452dcb\n' + \
@@ -196,13 +210,14 @@ class TestCliVerifyChecksumFile(object):
     def test_invalid_bad_arguments_invalid_algorithm(self):
         runner = CliRunner()
         result = runner.invoke(cli, ['verify_via_checksumfile', '--algorithm', 'foobar',
-                                     TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt.SHA256SUMS'])
+                                     os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS')])
         assert result.exit_code == 2
         assert "Error: Invalid value for '--algorithm': invalid choice: foobar." in result.output
 
     def test_invalid_bad_arguments_missing_checksumfile(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_checksumfile', TEST_DIR + 'file1.txt'])
+        result = runner.invoke(cli, ['verify_via_checksumfile', os.path.join(TEST_DIR, 'file1.txt')])
         assert result.exit_code == 2
         assert "Error: Missing argument 'CHECKSUMFILE'." in result.output
 
@@ -223,26 +238,29 @@ class TestCliVerifyPgp(object):
 
     def test_invalid_bad_arguments_missing_signaturefile(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_pgp', TEST_DIR + 'file1.txt'])
+        result = runner.invoke(cli, ['verify_via_pgp', os.path.join(TEST_DIR, 'file1.txt')])
         assert result.exit_code == 2
         assert "Error: Missing argument 'SIGNATUREFILE'." in result.output
 
     def test_invalid_bad_arguments_missing_keys(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_pgp', TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt.sig'])
+        result = runner.invoke(cli, ['verify_via_pgp', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.sig')])
         assert result.exit_code == 2
         assert "ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!\n" in result.output
 
     def test_invalid_bad_arguments_keyid_without_keyserver(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_pgp', TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt.sig',
+        result = runner.invoke(cli, ['verify_via_pgp', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.sig'),
                                      '--keyid', 'keyid'])
         assert result.exit_code == 2
         assert "ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!\n" in result.output
 
     def test_invalid_bad_arguments_keyserver_without_keyid(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_pgp', TEST_DIR + 'file1.txt', TEST_DIR + 'file1.txt.sig',
+        result = runner.invoke(cli, ['verify_via_pgp', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.sig'),
                                      '--keyserver', 'keyserver'])
         assert result.exit_code == 2
         assert "ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!\n" in result.output
@@ -258,34 +276,37 @@ class TestCliVerifyPgpChecksumFile(object):
 
     def test_invalid_bad_arguments_missing_checksumfile(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_pgpchecksumfile', TEST_DIR + 'file1.txt'])
+        result = runner.invoke(cli, ['verify_via_pgpchecksumfile', os.path.join(TEST_DIR, 'file1.txt')])
         assert result.exit_code == 2
         assert "Error: Missing argument 'CHECKSUMFILE'." in result.output
 
     def test_invalid_bad_arguments_missing_signaturefile(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_pgpchecksumfile', TEST_DIR + 'file1.txt',
-                                     TEST_DIR + 'file1.txt.SHA256SUMS'])
+        result = runner.invoke(cli, ['verify_via_pgpchecksumfile', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS')])
         assert result.exit_code == 2
         assert "Error: Missing argument 'SIGNATUREFILE'." in result.output
 
     def test_invalid_bad_arguments_missing_keys(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_pgpchecksumfile', TEST_DIR + 'file1.txt',
-                                     TEST_DIR + 'file1.txt.SHA256SUMS', TEST_DIR + 'file1.txt.SHA256SUMS.sig'])
+        result = runner.invoke(cli, ['verify_via_pgpchecksumfile', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS.sig')])
         assert result.exit_code == 2
         assert "ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!\n" in result.output
 
     def test_invalid_bad_arguments_keyid_without_keyserver(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_pgpchecksumfile', TEST_DIR + 'file1.txt',
-                                     TEST_DIR + 'file1.txt.SHA256SUMS', TEST_DIR + 'file1.txt.SHA256SUMS.sig'])
+        result = runner.invoke(cli, ['verify_via_pgpchecksumfile', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS.sig')])
         assert result.exit_code == 2
         assert "ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!\n" in result.output
 
     def test_invalid_bad_arguments_keyserver_without_keyid(self):
         runner = CliRunner()
-        result = runner.invoke(cli, ['verify_via_pgpchecksumfile', TEST_DIR + 'file1.txt',
-                                     TEST_DIR + 'file1.txt.SHA256SUMS', TEST_DIR + 'file1.txt.SHA256SUMS.sig'])
+        result = runner.invoke(cli, ['verify_via_pgpchecksumfile', os.path.join(TEST_DIR, 'file1.txt'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS'),
+                                     os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS.sig')])
         assert result.exit_code == 2
         assert "ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!\n" in result.output

@@ -1,0 +1,17 @@
+LICENSE
+MANIFEST.in
+README.md
+setup.cfg
+setup.py
+icecrust/__init__.py
+icecrust/cli.py
+icecrust/utils.py
+icecrust/utils_canary.py
+icecrust.egg-info/PKG-INFO
+icecrust.egg-info/SOURCES.txt
+icecrust.egg-info/dependency_links.txt
+icecrust.egg-info/entry_points.txt
+icecrust.egg-info/requires.txt
+icecrust.egg-info/top_level.txt
+icecrust/data/canary_input.schema.json
+icecrust/data/canary_output.schema.json

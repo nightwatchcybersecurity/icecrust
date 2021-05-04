@@ -23,7 +23,7 @@
 #
 from datetime import datetime
 from enum import Enum
-import json, pkg_resources
+import json, os, pkg_resources
 
 from download import download
 import jsonschema, tzlocal
@@ -32,8 +32,8 @@ from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
 
 
 # Location of the schema files
-CANARY_INPUT_SCHEMA  = pkg_resources.resource_filename('icecrust', 'data/canary_input.schema.json')
-CANARY_OUTPUT_SCHEMA = pkg_resources.resource_filename('icecrust', 'data/canary_output.schema.json')
+CANARY_INPUT_SCHEMA  = pkg_resources.resource_filename('icecrust', os.path.join('data', 'canary_input.schema.json'))
+CANARY_OUTPUT_SCHEMA = pkg_resources.resource_filename('icecrust', os.path.join('data', 'canary_output.schema.json'))
 
 # Names of files to be downloaded
 FILENAME_FILE1 = "file1.dat"
@@ -75,7 +75,8 @@ class IcecrustCanaryUtils(object):
                                               msg_callback=msg_callback)
 
         # Download checksum files
-        if verification_mode in [VerificationModes.VERIFY_VIA_CHECKSUMFILE, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
+        if verification_mode in [VerificationModes.VERIFY_VIA_CHECKSUMFILE,
+                                 VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
             IcecrustCanaryUtils.download_file(verification_data['checksumfile_url'], dir, FILENAME_CHECKSUM,
                                               msg_callback=msg_callback)
 
