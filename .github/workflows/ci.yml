@@ -40,6 +40,7 @@ jobs:
     - name: Test package build and install
       run: |
         python setup.py install
-        locate icecrust
+        ls /opt/hostedtoolcache/Python/3.9.4/x64/bin
+        echo $PATH
         icecrust --version
         icecrust_canary --version
