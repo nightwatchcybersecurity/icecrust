@@ -131,17 +131,17 @@ def verify(verbose, configfile, output_json_file, output_upptime_file):
     if output_json_file is not None:
         json_data = IcecrustCanaryUtils.generate_json(config_data, verification_mode, verification_result,
                                                         cmd_output, msg_callback)
-        json_output = open(output_json_file, "w")
-        json_output.write(json_data)
-        json_output.close()
+        output_json_stream = open(output_json_file, "w")
+        output_json_stream.write(json_data)
+        output_json_stream.close()
 
     # Generate/update the UppTime if needed
     if output_upptime_file is not None:
         yaml_data = IcecrustCanaryUtils.generate_upptime(output_upptime_file, config_data, verification_result,
                                                          msg_callback)
-        output_upptime = open(output_upptime_file, "w")
-        output_upptime_file.write(yaml_data)
-        output_upptime.close()
+        output_upptime_stream = open(output_upptime_file, "w")
+        output_upptime_stream.write(yaml_data)
+        output_upptime_stream.close()
 
     _process_result(verification_result)
 
