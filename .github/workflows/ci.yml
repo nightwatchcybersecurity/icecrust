@@ -7,8 +7,10 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        os: [ubuntu-latest]
+        python-version: [3.9]
+#        os: [ubuntu-latest, macos-latest]
+#        python-version: [3.6, 3.7, 3.8, 3.9]
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -38,5 +40,6 @@ jobs:
     - name: Test package build and install
       run: |
         python setup.py install
+        locate icecrust
         icecrust --version
         icecrust_canary --version
