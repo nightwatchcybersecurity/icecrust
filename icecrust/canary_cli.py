@@ -49,7 +49,7 @@ def cli():
 
 @cli.command('verify')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
-@click.option('--output-json-file', required=False, type=click.File('w'))
+@click.option('--output-json-file', required=False, type=click.Path(dir_okay=False, exists=False))
 @click.option('--output-upptime-file', required=False, type=click.Path(dir_okay=False, exists=False))
 @click.argument('configfile', required=True, type=click.File('r'))
 def verify(verbose, configfile, output_json_file, output_upptime_file):
@@ -132,8 +132,8 @@ def verify(verbose, configfile, output_json_file, output_upptime_file):
         json_data = IcecrustCanaryUtils.generate_json(config_data, verification_mode, verification_result,
                                                         cmd_output, msg_callback)
         json_output = open(output_json_file, "w")
-        output_upptime_file.write(json_data)
-        output_json_file.close()
+        json_output.write(json_data)
+        json_output.close()
 
     # Generate/update the UppTime if needed
     if output_upptime_file is not None:
