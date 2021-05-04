@@ -204,6 +204,25 @@ class TestGenerateUppTime(object):
         assert yaml_parsed['generator'] == 'icecrust ' + IcecrustUtils.get_version() + \
                ' <https://github.com/nightwatchcybersecurity/icecrust>'
 
+    def test_valid_verification_passed_existing_file(self):
+        config_data = dict()
+        config_data['url'] = 'https://www.example.com'
+        verified_result = True
+        yaml_raw = IcecrustCanaryUtils.generate_upptime(TEST_DIR + 'canary_upptime/file1.yml',
+                                                        config_data, verified_result)
+
+        stream = StringIO(yaml_raw)
+        yaml_parsed = yaml.load(stream)
+
+        assert yaml_parsed['url'] == config_data['url']
+        assert yaml_parsed['status'] == 'up'
+        assert yaml_parsed['code'] == 200
+        assert yaml_parsed['responseTime'] == 500
+        assert type(yaml_parsed['lastUpdated']) == datetime
+        assert yaml_parsed['startTime'] == 'Mon Aug 10 2020 07:54:43 GMT+0000'
+        assert yaml_parsed['generator'] == 'icecrust ' + IcecrustUtils.get_version() + \
+               ' <https://github.com/nightwatchcybersecurity/icecrust>'
+
 
 # Tests for get_verification_mode method
 class TestGetVerificationMode(object):
