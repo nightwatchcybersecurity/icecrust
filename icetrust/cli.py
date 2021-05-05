@@ -80,6 +80,11 @@ def canary(verbose, configfile, output_json_file, output_upptime_file):
     verification_data = IcetrustCanaryUtils.extract_verification_data(config_data, verification_mode,
                                                                       msg_callback=msg_callback)
 
+    # Check verification_data for warnings
+    if verbose:
+        IcetrustCanaryUtils.check_verification_data(config_data, verification_mode, verification_data,
+                                                    msg_callback=msg_callback)
+
     # Create temporary directory
     temp_dir_obj = tempfile.TemporaryDirectory()
     temp_dir = temp_dir_obj.name + '/'

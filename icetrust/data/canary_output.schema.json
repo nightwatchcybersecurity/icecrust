@@ -44,7 +44,7 @@
      },
     "verified": {
       "type": "boolean",
-      "title": "Whether verification was sucessful or not"
+      "title": "Whether verification was successful or not"
      },
     "output": {
       "type": "string",

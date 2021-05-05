@@ -23,6 +23,7 @@
 #
 from datetime import datetime
 from enum import Enum
+from urllib.parse import urlparse
 import json, os, pkg_resources
 
 from download import download
@@ -53,6 +54,31 @@ class VerificationModes(Enum):
 
 class IcetrustCanaryUtils(object):
     """Various utility functions for the canary CLI"""
+    @staticmethod
+    def check_verification_data(config_data, verification_mode, verification_data, msg_callback=None):
+        """
+        Checks verification data for possible warnings
+
+        :param config_data: data extracted from the config file
+        :param verification_mode: verification mode being used
+        :param verification_data: parsed JSON containing verification data
+        :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        """
+        filename_url = urlparse(config_data['filename_url'])
+        file2_url = None
+        if verification_mode == VerificationModes.COMPARE_FILES:
+            file2_url = urlparse(verification_data['file2_url'])
+        elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUM:
+            pass
+        elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUMFILE:
+            file2_url = urlparse(verification_data['checksumfile_url'])
+        elif verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE] \
+                and 'keyfile_url' in verification_data:
+            file2_url = urlparse(verification_data['keyfile_url'])
+
+        if file2_url is not None and filename_url.netloc != file2_url.netloc:
+            msg_callback.echo("WARNING: URLs for the file being verified and verification data are on the same server!")
+
     @staticmethod
     def download_all_files(verification_mode, dir, filename_url, verification_data, msg_callback=None):
         """

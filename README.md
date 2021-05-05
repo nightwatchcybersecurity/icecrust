@@ -106,7 +106,6 @@ You can also send emai to ***research /at/ nightwatchcybersecurity [dot] com***
 ## Wishlist
 - Add more unit tests
 - Add warning checks for when URLs are being served from the same site
-- Add help for all CLI options
 
 ## About the name
 The name "Ice Trust" is a play on words "Ice Crust" or "Ледяная Кора", which
