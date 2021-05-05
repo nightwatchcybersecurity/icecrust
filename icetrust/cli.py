@@ -147,7 +147,7 @@ def canary(verbose, configfile, output_json_file, output_upptime_file):
 @click.argument('file1', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('file2', required=True, type=click.Path(exists=True, dir_okay=False))
 def compare_files(verbose, file1, file2):
-    """Compares two files by calculating hashes"""
+    """Compares FILE1 against FILE2 by calculating hashes"""
     comparison_result = IcetrustUtils.compare_files(file1, file2,
                                                     msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     _process_result(comparison_result)
@@ -156,11 +156,11 @@ def compare_files(verbose, file1, file2):
 @cli.command('verify_via_checksum')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.option('--checksum_value', required=True)
-@click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, type=click.Choice(['sha1', 'sha256', 'sha512'],
-                                                                               case_sensitive=False))
+@click.argument('checksum_value', required=True)
+@click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, help='Hash algorithm to be used (sha1, sha256 or sha512)',
+              type=click.Choice(['sha1', 'sha256', 'sha512'], case_sensitive=False))
 def verify_via_checksum(verbose, filename, checksum_value, algorithm):
-    """Verify via a checksum value"""
+    """Verify FILENAME against the CHECKSUM_VALUE"""
     checksum_valid = IcetrustUtils.verify_checksum(filename, algorithm, checksum_value=checksum_value,
                                                    msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     _process_result(checksum_valid)
@@ -170,10 +170,10 @@ def verify_via_checksum(verbose, filename, checksum_value, algorithm):
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('checksumfile', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, type=click.Choice(['sha1', 'sha256', 'sha512'],
-                                                                               case_sensitive=False))
+@click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, help='Hash algorithm to be used (sha1, sha256 or sha512)',
+              type=click.Choice(['sha1', 'sha256', 'sha512'], case_sensitive=False))
 def verify_via_checksumfile(verbose, filename, checksumfile, algorithm):
-    """Verify via a checksums file"""
+    """Verify FILENAME against a checksum value in the CHECKSUMFILE"""
     checksum_valid = IcetrustUtils.verify_checksum(filename, algorithm, checksumfile=checksumfile,
                                                    msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     _process_result(checksum_valid)
@@ -188,7 +188,7 @@ def verify_via_checksumfile(verbose, filename, checksumfile, algorithm):
 @click.option('--keyid', required=False, help='PGP key ID')
 @click.option('--keyserver', required=False, help='Domain name of the PGP keyserver')
 def verify_via_pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
-    """Verify via a PGP signature"""
+    """Verify FILENAME via a PGP signature in SIGNATUREFILE using provided keys"""
     # Check input parameters
     if keyfile is None and (keyid is None or keyserver is None):
         click.echo("ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!")
@@ -218,7 +218,7 @@ def verify_via_pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
 @click.option('--keyid', required=False)
 @click.option('--keyserver', required=False)
 def verify_via_pgpchecksumfile(verbose, filename, checksumfile, signaturefile, algorithm, keyfile, keyid, keyserver):
-    """Verify via a PGP-signed checksums file"""
+    """Verify FILENAME via a PGP-signed CHECKSUMFILE, with a signature in SIGNATUREFILE using provided keys"""
     # Check input parameters
     if keyfile is None and (keyid is None or keyserver is None):
         click.echo("ERROR: Either '--keyfile' or '--keyid/--keyserver' parameters must be set!")

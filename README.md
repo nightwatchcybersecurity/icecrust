@@ -16,7 +16,7 @@ You must also have GnuPG installed.
 You can install this via PIP as follows:
 ```
 pip install icetrust
-icetrust version
+icetrust --version
 ```
 To download and run manually, do the following:
 ```
