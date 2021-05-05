@@ -4,7 +4,11 @@
 [![codecov](https://codecov.io/gh/nightwatchcybersecurity/icetrust/branch/master/graph/badge.svg)](https://codecov.io/gh/nightwatchcybersecurity/icetrust)
 ![GitHub](https://img.shields.io/github/license/nightwatchcybersecurity/icetrust.svg)
 
-A tool for verification of software downloads using hashes and/or PGP.
+# What is this?
+A tool for verification of software downloads using checksums and/or PGP.
+
+This tool is intended to make verification of downloads easier. Development of this project 
+was prompted by [the recent supply chain attack against codecov.io](https://about.codecov.io/security-update/).
 
 ## Requirements
 Python 3 is required and you can find all required modules in the **requirements.txt** file.
@@ -26,20 +30,76 @@ pip install -r requirements.txt
 python -m icetrust.cli
 ```
 
-## How to use 
-There are two main types of operations this utility can do:
-1. Verify a file against a PGP detached signature, using a key ID or a file containing keys.
-2. Verify a file against a PGP-signed checksum, using a key ID or file containing keys.
+# How to use 
+There are two main modes that this tool can be used in:
+1. For project owners: ["canary" mode](CANARY.MD) to download and verify project files on a regular basis
+to detect supply chain attacks.
+2. For end users: verification of already downloaded files against checksums or PGP.
 
 If you are using a key ID, this utility will attempt to connect to a PGP server. If you use a keyfile,
-the verification will be done entirely off line.
-
-This utility will not modify or use your PGP keyrings, instead a temporary directory is created for this purpose.
+the verification will be done entirely off-line.  This utility will not modify or use your PGP keyrings, instead a temporary directory is created for this purpose.
 While this is less efficient and somewhat less secure, it is easier for a lot of users since it avoids the
 complexity of managing PGP keys.
 
-### Verifying a detached signature
-First download the software to be verified and its signature:
+***NOTE***: if you are comfortable with using GnuPG and native OS command line tools for
+verification, please use those instead. This tool is only intended for users who are not yet
+comfortable with that approach.
+
+## Canary Mode
+See [CANARY.MD](CANARY.MD) for help.
+
+## Verification modes
+This tool offers the following verification modes to verify downloaded files:
+1. ***compare_files*** - compares a downloaded file against another copy obtained from another
+   source/location, using checksums.
+2. ***verify_via_checksum*** - verifies a downloaded file against a hardcoded checksum value.
+3. ***verify_via_checksumfile*** - verifies a downloaded file against checksum values in a separate
+   file. The file follows the format used by SHASUM.
+4. ***verify_via_pgp*** - verifies a downloaded file against a detached PGP signature in a separate
+   file. This uses PGP keys provided via a file or a key ID/server name.
+5. ***verify_via_pgpchecksumfile*** - verifies a downloaded file against checksum values in a separate
+   file. That file is first verified via a detached PGP signature using PGP keys provided
+   via a file or a key ID/server name.
+   
+To view more details on the verification process, use the "--verbose" option.
+
+### compare_files
+First download the software to be verified and its second copy:
+```
+curl -O https://www1.example.com/software1.zip
+curl -O https://www2.example.com/software2.zip
+```
+
+Compare the files (SHA-256 is used):
+```
+icetrust compare_files software1.zip software2.zip
+```
+
+### verify_via_checksumfile
+First download the software to be verified:
+```
+curl -O https://www.example.com/software.zip
+```
+
+Verify using the checksum value (unless specified, SHA-256 is used):
+```
+icetrust verify_via_checksum software.zip foobarchecksumvaluefoobar
+```
+
+### verify_via_checksumfile
+First download the software to be verified and its checksum file:
+```
+curl -O https://www1.example.com/software.zip
+curl -O https://www2.example.com/software.CHECKSUMS.txt
+```
+
+Verify using the checksum file (unless specified, SHA-256 is used):
+```
+icetrust verify_via_checksumfile software.zip software.CHECKSUMS.txt
+```
+
+### verify_via_pgp
+First download the software to be verified and its signature file:
 ```
 curl -O https://www.example.com/software.zip
 curl -O https://www.example.com/software.zip.sig
@@ -47,16 +107,16 @@ curl -O https://www.example.com/software.zip.sig
 
 Verify using a key ID:
 ```
-icetrust pgpverify_with_keyid software.zip software.zip.sig --keyid 12345 --keyserver pgp.example.com
+icetrust verify_via_pgp software.zip software.zip.sig --keyid 12345 --keyserver pgp.example.com
 ```
 
 If you want to use a keyfile, you must download it or provide it, then verify:
 ```
-curl -O https://www.example.com/project_keys.txt
-icetrust pgpverify_with_keyfile software.zip software.zip.sig --keyfile project_keys.txt
+curl -O https://keys.example.com/project_keys.txt
+icetrust verify_via_pgp software.zip software.zip.sig --keyfile project_keys.txt
 ```
 
-### Verifying using a PGP-signed checksum file
+### verify_via_pgpchecksumfile
 First download the software to be verified, its checksum and signatures:
 ```
 curl -O https://www.example.com/software.zip
@@ -64,36 +124,38 @@ curl -O https://www.example.com/software.CHECKSUMS.txt
 curl -O https://www.example.com/software.CHECKSUMS.txt.sig
 ```
 
-Verify using a key ID (algorithm is option and defaults to SHA-256):
+Verify using a key ID (unless specified, SHA-256 is used):
 ```
-icetrust checksumverify_with_keyid software.zip software.CHECKSUMS.txt software.CHECKSUMS.txt.sig --keyid 12345 --keyserver pgp.example.com -algorithm sha256
+icetrust verify_via_pgpchecksumfile software.zip software.CHECKSUMS.txt software.CHECKSUMS.txt.sig --keyid 12345 --keyserver pgp.example.com
 ```
 
 If you want to use a keyfile, you must download it or provide it, then verify:
 ```
-curl -O https://www.example.com/project_keys.txt
-icetrust checksumverify_with_keyid software.zip software.CHECKSUMS.txt software.CHECKSUMS.txt.sig --keyfile project_keys.txt
+curl -O https://keys.example.com/project_keys.txt
+icetrust verify_via_pgpchecksumfile software.zip software.CHECKSUMS.txt software.CHECKSUMS.txt.sig --keyfile project_keys.txt
 ```
 
-## Sample output
-Any errors will result in a non-zero return.
-
+# Sample output and automation
 Display installed version:
 ```
 user@localhost:~/$ icetrust --version
 icetrust, version 0.1.0
 ```
 
-Example of detached signature verification:
+Example of successful verification
 ```
-signature valid
+File verified
 ```
 
-Example of checksum verification with key ID:
+Example of failed verification
 ```
-signature valid
-File checksum verified against the checksums file
+ERROR: File cannot be verified!
 ```
+
+Successful verification will return 0. Any errors or failed verification
+will result in a non-zero return.
+
+For more advanced automation, see [CANARY.MD](CANARY.MD).
 
 # Development Information
 
@@ -105,7 +167,6 @@ You can also send emai to ***research /at/ nightwatchcybersecurity [dot] com***
 
 ## Wishlist
 - Add more unit tests
-- Add warning checks for when URLs are being served from the same site
 
 ## About the name
 The name "Ice Trust" is a play on words "Ice Crust" or "Ледяная Кора", which

@@ -51,7 +51,7 @@ class IcetrustUtils(object):
     @staticmethod
     def compare_files(file1, file2, msg_callback=None, cmd_output=None):
         """
-        Compare files by calculating and comparing SHA-256 hashes
+        Compare files by calculating and comparing SHA-256 checksums
 
         :param file1: First file to compare
         :param file2: Second file to compare
@@ -59,7 +59,7 @@ class IcetrustUtils(object):
         :param cmd_output: Additional data to be used for JSON output
         :return: True if matches, False if doesn't match
         """
-        # Calculate the hashes
+        # Calculate the checksums
         hasher = filehash.FileHash(DEFAULT_HASH_ALGORITHM)
         try:
             file1_hash = hasher.hash_file(filename=file1)

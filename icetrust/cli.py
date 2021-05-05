@@ -153,7 +153,7 @@ def canary(verbose, configfile, output_json_file, output_upptime_file):
 @click.argument('file1', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('file2', required=True, type=click.Path(exists=True, dir_okay=False))
 def compare_files(verbose, file1, file2):
-    """Compares FILE1 against FILE2 by calculating hashes"""
+    """Compares FILE1 against FILE2 by calculating checksums"""
     comparison_result = IcetrustUtils.compare_files(file1, file2,
                                                     msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     _process_result(comparison_result)
