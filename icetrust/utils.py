@@ -1,8 +1,8 @@
 #
 # Copyright (c) 2021 Nightwatch Cybersecurity.
 #
-# This file is part of icecrust
-# (see https://github.com/nightwatchcybersecurity/icecrust).
+# This file is part of icetrust
+# (see https://github.com/nightwatchcybersecurity/icetrust).
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -41,7 +41,7 @@ class MsgCallback(object):
         self.messages.append(message)
 
 
-class IcecrustUtils(object):
+class IcetrustUtils(object):
     """Various utility functions, split off from the main class for ease of unit testing"""
     @staticmethod
     def get_version():
@@ -135,9 +135,9 @@ class IcecrustUtils(object):
         # Setup GPG
         if gpg_home_dir is None:
             temp_dir = tempfile.TemporaryDirectory()
-            return gnupg.GPG(gnupghome=temp_dir.name, verbose=verbose)
+            return gnupg.GPG(gnupghome=str(temp_dir.name), verbose=verbose)
         else:
-            return gnupg.GPG(gnupghome=gpg_home_dir, verbose=verbose)
+            return gnupg.GPG(gnupghome=str(gpg_home_dir), verbose=verbose)
 
     @staticmethod
     def pgp_verify(gpg, filename, signaturefile, msg_callback=None, cmd_output=None):

@@ -1,8 +1,8 @@
 #
 # Copyright (c) 2021 Nightwatch Cybersecurity.
 #
-# This file is part of icecrust
-# (see https://github.com/nightwatchcybersecurity/icecrust).
+# This file is part of icetrust
+# (see https://github.com/nightwatchcybersecurity/icetrust).
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -26,7 +26,7 @@ import os
 from click.testing import CliRunner
 import pytest
 
-from icecrust.cli import cli
+from icetrust.cli import cli
 from test_utils import TEST_DIR
 
 

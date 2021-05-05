@@ -27,7 +27,7 @@ jobs:
 
     - name: Run unit tests
       run: |
-        python -m pytest --cov=icecrust/ --cov-report=xml
+        python -m pytest --cov=icetrust/ --cov-report=xml
         codecov
 
     - name: Upload coverage to Codecov
@@ -38,5 +38,5 @@ jobs:
     - name: Test package build and install
       run: |
         python setup.py install
-        icecrust --version
-        icecrust verify_via_checksumfile test_data/file1.txt test_data/file1.txt.SHA256SUMS
+        icetrust --version
+        icetrust verify_via_checksumfile test_data/file1.txt test_data/file1.txt.SHA256SUMS

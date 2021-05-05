@@ -2,8 +2,8 @@
 #
 # Copyright (c) 2021 Nightwatch Cybersecurity.
 #
-# This file is part of icecrust
-# (see https://github.com/nightwatchcybersecurity/icecrust).
+# This file is part of icetrust
+# (see https://github.com/nightwatchcybersecurity/icetrust).
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -28,8 +28,8 @@
 # and a release is done on GitHub at the same time.
 #
 # Package can be viewed online at:
-# Sandbox: https://test.pypi.org/project/icecrust/
-# Prod: https://pypi.org/project/icecrust/
+# Sandbox: https://test.pypi.org/project/icetrust/
+# Prod: https://pypi.org/project/icetrust/
 
 # Installs requirements
 echo Installing required tools...

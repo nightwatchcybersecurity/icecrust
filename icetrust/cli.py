@@ -1,8 +1,8 @@
 #
 # Copyright (c) 2021 Nightwatch Cybersecurity.
 #
-# This file is part of icecrust
-# (see https://github.com/nightwatchcybersecurity/icecrust).
+# This file is part of icetrust
+# (see https://github.com/nightwatchcybersecurity/icetrust).
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -24,19 +24,19 @@
 import sys, tempfile
 
 import click
-from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
-from icecrust.utils_canary import FILENAME_FILE1, FILENAME_FILE2, FILENAME_CHECKSUM, FILENAME_SIGNATURE,\
-    IcecrustCanaryUtils, VerificationModes
+from icetrust.utils import DEFAULT_HASH_ALGORITHM, IcetrustUtils
+from icetrust.utils_canary import FILENAME_FILE1, FILENAME_FILE2, FILENAME_CHECKSUM, FILENAME_SIGNATURE,\
+    IcetrustCanaryUtils, VerificationModes
 
 
-@click.version_option(version=IcecrustUtils.get_version(), prog_name='icecrust')
+@click.version_option(version=IcetrustUtils.get_version(), prog_name='icetrust')
 @click.group()
 def cli():
     """
-    icecrust - A tool for verification of software downloads using checksums and/or PGP.
+    icetrust - A tool for verification of software downloads using checksums and/or PGP.
 
     Copyright (c) 2021 Nightwatch Cybersecurity.
-    Source code: https://github.com/nightwatchcybersecurity/icecrust
+    Source code: https://github.com/nightwatchcybersecurity/icetrust
     """
     # TODO: Add input validation
     # TODO: Move private code into a separate module
@@ -60,23 +60,23 @@ def canary(verbose, configfile, output_json_file, output_upptime_file):
     """Does a canary check against a project"""
     # Setup objects to be used
     cmd_output = []
-    msg_callback = IcecrustUtils.process_verbose_flag(verbose)
+    msg_callback = IcetrustUtils.process_verbose_flag(verbose)
 
     # Validate the config file
-    config_data = IcecrustCanaryUtils.validate_config_file(configfile, msg_callback=msg_callback)
+    config_data = IcetrustCanaryUtils.validate_config_file(configfile, msg_callback=msg_callback)
     if config_data is None:
         _process_result(False)
 
     # Select the right mode
     verification_mode =\
-        IcecrustCanaryUtils.get_verification_mode(config_data, msg_callback=msg_callback)
+        IcetrustCanaryUtils.get_verification_mode(config_data, msg_callback=msg_callback)
     if verification_mode is None:
         click.echo('Unknown verification mode in the config file!')
         _process_result(False)
     print('Using verification mode: ' + verification_mode.name)
 
     # Extract verification data
-    verification_data = IcecrustCanaryUtils.extract_verification_data(config_data, verification_mode,
+    verification_data = IcetrustCanaryUtils.extract_verification_data(config_data, verification_mode,
                                                                       msg_callback=msg_callback)
 
     # Create temporary directory
@@ -84,16 +84,16 @@ def canary(verbose, configfile, output_json_file, output_upptime_file):
     temp_dir = temp_dir_obj.name + '/'
 
     # Download all of the files required
-    IcecrustCanaryUtils.download_all_files(verification_mode, temp_dir, config_data['filename_url'],
+    IcetrustCanaryUtils.download_all_files(verification_mode, temp_dir, config_data['filename_url'],
                                            verification_data, msg_callback=msg_callback)
 
     # Import keys for those operations that need it
     if verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
         # Initialize PGP
-        gpg = IcecrustUtils.pgp_init(gpg_home_dir=temp_dir_obj.name)
+        gpg = IcetrustUtils.pgp_init(gpg_home_dir=temp_dir_obj.name)
 
         # Import keys if needed
-        import_result = IcecrustCanaryUtils.import_key_material(gpg, temp_dir, verification_data,
+        import_result = IcetrustCanaryUtils.import_key_material(gpg, temp_dir, verification_data,
                                                                 msg_callback=msg_callback)
         if import_result is False:
             _process_result(import_result)
@@ -101,30 +101,30 @@ def canary(verbose, configfile, output_json_file, output_upptime_file):
     # Main operation code
     verification_result = False
     if verification_mode == VerificationModes.COMPARE_FILES:
-        verification_result = IcecrustUtils.compare_files(temp_dir + FILENAME_FILE1, temp_dir + FILENAME_FILE2,
+        verification_result = IcetrustUtils.compare_files(temp_dir + FILENAME_FILE1, temp_dir + FILENAME_FILE2,
                                                           msg_callback=msg_callback, cmd_output=cmd_output)
     elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUM:
-        algorithm = IcecrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
-        verification_result = IcecrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
+        algorithm = IcetrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
+        verification_result = IcetrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
                                                             checksum_value=verification_data['checksum_value'],
                                                             msg_callback=msg_callback, cmd_output=cmd_output)
     elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUMFILE:
-        algorithm = IcecrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
-        verification_result = IcecrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
+        algorithm = IcetrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
+        verification_result = IcetrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
                                                             checksumfile=temp_dir + FILENAME_CHECKSUM,
                                                             msg_callback=msg_callback, cmd_output=cmd_output)
     elif verification_mode == VerificationModes.VERIFY_VIA_PGP:
-        verification_result = IcecrustUtils.pgp_verify(gpg, temp_dir + FILENAME_FILE1, temp_dir + FILENAME_SIGNATURE,
+        verification_result = IcetrustUtils.pgp_verify(gpg, temp_dir + FILENAME_FILE1, temp_dir + FILENAME_SIGNATURE,
                                                        msg_callback=msg_callback, cmd_output=cmd_output)
     elif verification_mode == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE:
         # Verify the signature of the checksum file first
-        signature_result = IcecrustUtils.pgp_verify(gpg, temp_dir + FILENAME_CHECKSUM, temp_dir + FILENAME_SIGNATURE,
+        signature_result = IcetrustUtils.pgp_verify(gpg, temp_dir + FILENAME_CHECKSUM, temp_dir + FILENAME_SIGNATURE,
                                                     msg_callback=msg_callback, cmd_output=cmd_output)
 
         # Then verify the checksums themselves
         if signature_result:
-            algorithm = IcecrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
-            verification_result = IcecrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
+            algorithm = IcetrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
+            verification_result = IcetrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
                                                                 checksumfile=temp_dir + FILENAME_CHECKSUM,
                                                                 msg_callback=msg_callback, cmd_output=cmd_output)
     else:
@@ -133,7 +133,7 @@ def canary(verbose, configfile, output_json_file, output_upptime_file):
 
     # Generate JSON file if needed
     if output_json_file is not None:
-        json_data = IcecrustCanaryUtils.generate_json(config_data, verification_mode, verification_result,
+        json_data = IcetrustCanaryUtils.generate_json(config_data, verification_mode, verification_result,
                                                         cmd_output, msg_callback)
         output_json_stream = open(output_json_file, "w")
         output_json_stream.write(json_data)
@@ -148,8 +148,8 @@ def canary(verbose, configfile, output_json_file, output_upptime_file):
 @click.argument('file2', required=True, type=click.Path(exists=True, dir_okay=False))
 def compare_files(verbose, file1, file2):
     """Compares two files by calculating hashes"""
-    comparison_result = IcecrustUtils.compare_files(file1, file2,
-                                                    msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+    comparison_result = IcetrustUtils.compare_files(file1, file2,
+                                                    msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     _process_result(comparison_result)
 
 
@@ -161,8 +161,8 @@ def compare_files(verbose, file1, file2):
                                                                                case_sensitive=False))
 def verify_via_checksum(verbose, filename, checksum_value, algorithm):
     """Verify via a checksum value"""
-    checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksum_value=checksum_value,
-                                                   msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+    checksum_valid = IcetrustUtils.verify_checksum(filename, algorithm, checksum_value=checksum_value,
+                                                   msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     _process_result(checksum_valid)
 
 
@@ -174,8 +174,8 @@ def verify_via_checksum(verbose, filename, checksum_value, algorithm):
                                                                                case_sensitive=False))
 def verify_via_checksumfile(verbose, filename, checksumfile, algorithm):
     """Verify via a checksums file"""
-    checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksumfile=checksumfile,
-                                                   msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+    checksum_valid = IcetrustUtils.verify_checksum(filename, algorithm, checksumfile=checksumfile,
+                                                   msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     _process_result(checksum_valid)
 
 
@@ -195,15 +195,15 @@ def verify_via_pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
         sys.exit(2)
 
     # Initialize PGP and import keys
-    gpg = IcecrustUtils.pgp_init(verbose)
-    import_result = IcecrustUtils.pgp_import_keys(gpg, keyfile=keyfile, keyid=keyid, keyserver=keyserver,
-                                                  msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+    gpg = IcetrustUtils.pgp_init(verbose)
+    import_result = IcetrustUtils.pgp_import_keys(gpg, keyfile=keyfile, keyid=keyid, keyserver=keyserver,
+                                                  msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     if import_result is False:
         _process_result(import_result)
 
     # Verify file
-    verification_result = IcecrustUtils.pgp_verify(gpg, filename, signaturefile,
-                                                   msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+    verification_result = IcetrustUtils.pgp_verify(gpg, filename, signaturefile,
+                                                   msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     _process_result(verification_result)
 
 
@@ -225,23 +225,23 @@ def verify_via_pgpchecksumfile(verbose, filename, checksumfile, signaturefile, a
         sys.exit(2)
 
     # Initialize PGP and import keys
-    gpg = IcecrustUtils.pgp_init(verbose)
-    import_result = IcecrustUtils.pgp_import_keys(gpg, keyfile=keyfile, keyid=keyid, keyserver=keyserver,
-                                                  msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+    gpg = IcetrustUtils.pgp_init(verbose)
+    import_result = IcetrustUtils.pgp_import_keys(gpg, keyfile=keyfile, keyid=keyid, keyserver=keyserver,
+                                                  msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     if import_result is False:
         _process_result(import_result)
 
     # Verify checksums file
-    verification_result = IcecrustUtils.pgp_verify(gpg, checksumfile, signaturefile,
-                                                   msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+    verification_result = IcetrustUtils.pgp_verify(gpg, checksumfile, signaturefile,
+                                                   msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     if verification_result.status is False:
         _process_result(verification_result)
 
     # Check hash against the checksums file
-    checksum_valid = IcecrustUtils.verify_checksum(filename, algorithm, checksumfile=checksumfile,
-                                                   msg_callback=IcecrustUtils.process_verbose_flag(verbose))
+    checksum_valid = IcetrustUtils.verify_checksum(filename, algorithm, checksumfile=checksumfile,
+                                                   msg_callback=IcetrustUtils.process_verbose_flag(verbose))
     _process_result(checksum_valid)
 
 
 if __name__ == '__main__':
-    cli(prog_name='icecrust')
+    cli(prog_name='icetrust')

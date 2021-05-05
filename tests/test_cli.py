@@ -1,8 +1,8 @@
 #
 # Copyright (c) 2021 Nightwatch Cybersecurity.
 #
-# This file is part of icecrust
-# (see https://github.com/nightwatchcybersecurity/icecrust).
+# This file is part of icetrust
+# (see https://github.com/nightwatchcybersecurity/icetrust).
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -25,8 +25,8 @@ import os
 
 from click.testing import CliRunner
 
-from icecrust.cli import cli
-from icecrust.utils import IcecrustUtils
+from icetrust.cli import cli
+from icetrust.utils import IcetrustUtils
 from test_utils import TEST_DIR, FILE1_HASH, FILE2_HASH
 
 
@@ -36,7 +36,7 @@ class TestCliVersion(object):
         runner = CliRunner()
         result = runner.invoke(cli, ['--version'])
         assert result.exit_code == 0
-        assert result.output == 'icecrust, version ' + IcecrustUtils.get_version() + '\n'
+        assert result.output == 'icetrust, version ' + IcetrustUtils.get_version() + '\n'
 
 
 # Tests for "compare_files" option

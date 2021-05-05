@@ -1,8 +1,8 @@
 #
 # Copyright (c) 2021 Nightwatch Cybersecurity.
 #
-# This file is part of icecrust
-# (see https://github.com/nightwatchcybersecurity/icecrust).
+# This file is part of icetrust
+# (see https://github.com/nightwatchcybersecurity/icetrust).
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -28,12 +28,12 @@ import json, os, pkg_resources
 from download import download
 import jsonschema, tzlocal
 
-from icecrust.utils import DEFAULT_HASH_ALGORITHM, IcecrustUtils
+from icetrust.utils import DEFAULT_HASH_ALGORITHM, IcetrustUtils
 
 
 # Location of the schema files
-CANARY_INPUT_SCHEMA  = pkg_resources.resource_filename('icecrust', os.path.join('data', 'canary_input.schema.json'))
-CANARY_OUTPUT_SCHEMA = pkg_resources.resource_filename('icecrust', os.path.join('data', 'canary_output.schema.json'))
+CANARY_INPUT_SCHEMA  = pkg_resources.resource_filename('icetrust', os.path.join('data', 'canary_input.schema.json'))
+CANARY_OUTPUT_SCHEMA = pkg_resources.resource_filename('icetrust', os.path.join('data', 'canary_output.schema.json'))
 
 # Names of files to be downloaded
 FILENAME_FILE1 = "file1.dat"
@@ -51,7 +51,7 @@ class VerificationModes(Enum):
     VERIFY_VIA_PGPCHECKSUMFILE = 'verify_via_pgpchecksumfile'
 
 
-class IcecrustCanaryUtils(object):
+class IcetrustCanaryUtils(object):
     """Various utility functions for the canary CLI"""
     @staticmethod
     def download_all_files(verification_mode, dir, filename_url, verification_data, msg_callback=None):
@@ -67,28 +67,28 @@ class IcecrustCanaryUtils(object):
         """
         # Main file is always downloaded
         print('Downloading file: ' + filename_url)
-        IcecrustCanaryUtils.download_file(filename_url, dir, FILENAME_FILE1, msg_callback=msg_callback)
+        IcetrustCanaryUtils.download_file(filename_url, dir, FILENAME_FILE1, msg_callback=msg_callback)
 
         # Download comparison file
         if verification_mode == VerificationModes.COMPARE_FILES:
-            IcecrustCanaryUtils.download_file(verification_data['file2_url'], dir, FILENAME_FILE2,
+            IcetrustCanaryUtils.download_file(verification_data['file2_url'], dir, FILENAME_FILE2,
                                               msg_callback=msg_callback)
 
         # Download checksum files
         if verification_mode in [VerificationModes.VERIFY_VIA_CHECKSUMFILE,
                                  VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
-            IcecrustCanaryUtils.download_file(verification_data['checksumfile_url'], dir, FILENAME_CHECKSUM,
+            IcetrustCanaryUtils.download_file(verification_data['checksumfile_url'], dir, FILENAME_CHECKSUM,
                                               msg_callback=msg_callback)
 
         # Download signature files
         if verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
-            IcecrustCanaryUtils.download_file(verification_data['signaturefile_url'], dir, FILENAME_SIGNATURE,
+            IcetrustCanaryUtils.download_file(verification_data['signaturefile_url'], dir, FILENAME_SIGNATURE,
                                               msg_callback=msg_callback)
 
         # Download key file
         if verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
             if 'keyfile_url' in verification_data:
-                IcecrustCanaryUtils.download_file(verification_data['keyfile_url'], dir, dir + FILENAME_KEYS,
+                IcetrustCanaryUtils.download_file(verification_data['keyfile_url'], dir, dir + FILENAME_KEYS,
                                                   msg_callback=msg_callback)
 
 
@@ -206,7 +206,7 @@ class IcecrustCanaryUtils(object):
             keyfile_path = dir + FILENAME_KEYS
 
         # Do the actual import
-        import_result = IcecrustUtils.pgp_import_keys(gpg, keyfile=keyfile_path,
+        import_result = IcetrustUtils.pgp_import_keys(gpg, keyfile=keyfile_path,
                                                       keyid=verification_data['keyid'],
                                                       keyserver=verification_data['keyserver'],
                                                       msg_callback=msg_callback)

@@ -1,16 +1,16 @@
 from setuptools import find_packages, setup
-from icecrust.utils import IcecrustUtils
+from icetrust.utils import IcetrustUtils
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='icecrust',
-    version=IcecrustUtils.get_version(),
+    name='icetrust',
+    version=IcetrustUtils.get_version(),
     description='A tool for verification of software downloads using checksums and PGP.',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url='https://github.com/nightwatchcybersecurity/icecrust',
+    url='https://github.com/nightwatchcybersecurity/icetrust',
     author='Nightwatch Cybersecurity',
     author_email='research@nightwatchcybersecurity.com',
     license='Apache',
@@ -19,7 +19,7 @@ setup(
     install_requires=open('requirements.txt').read().splitlines(),
     entry_points={
         'console_scripts': [
-            'icecrust = icecrust.cli:cli'
+            'icetrust = icetrust.cli:cli'
         ]
     },
     classifiers=[
@@ -34,7 +34,7 @@ setup(
     ],
     python_requires='>=3.6',
     project_urls={
-        'Bug Reports': 'https://github.com/nightwatchcybersecurity/icecrust/issues',
-        'Source': 'https://github.com/nightwatchcybersecurity/icecrust',
+        'Bug Reports': 'https://github.com/nightwatchcybersecurity/icetrust/issues',
+        'Source': 'https://github.com/nightwatchcybersecurity/icetrust',
     },
 )

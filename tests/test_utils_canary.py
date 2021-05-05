@@ -1,8 +1,8 @@
 #
 # Copyright (c) 2021 Nightwatch Cybersecurity.
 #
-# This file is part of icecrust
-# (see https://github.com/nightwatchcybersecurity/icecrust).
+# This file is part of icetrust
+# (see https://github.com/nightwatchcybersecurity/icetrust).
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -25,9 +25,9 @@ import json, os
 
 import jsonschema, pytest
 
-from icecrust.utils_canary import\
+from icetrust.utils_canary import\
     VerificationModes, CANARY_INPUT_SCHEMA, CANARY_OUTPUT_SCHEMA, DEFAULT_HASH_ALGORITHM
-from icecrust.utils_canary import IcecrustCanaryUtils
+from icetrust.utils_canary import IcetrustCanaryUtils
 
 from test_utils import mock_msg_callback, TEST_DIR
 
@@ -104,32 +104,32 @@ class TestCanaryUtils(object):
 # Tests for extract_verification_data method
 class TestExtractVerificationData(object):
     def test_valid(self):
-        config = IcecrustCanaryUtils.validate_config_file(
+        config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/compare_pnpm_input.json'), 'r'))
-        assert IcecrustCanaryUtils.extract_verification_data(config, VerificationModes.COMPARE_FILES) is not None
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.COMPARE_FILES) is not None
 
-        config = IcecrustCanaryUtils.validate_config_file(
+        config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/checksum_pnpm_input.json'), 'r'))
-        assert IcecrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_CHECKSUM) is not None
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_CHECKSUM) is not None
 
-        config = IcecrustCanaryUtils.validate_config_file(
+        config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/checksumfile_pnpm_input.json'), 'r'))
-        assert IcecrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_CHECKSUMFILE)\
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_CHECKSUMFILE)\
                is not None
 
-        config = IcecrustCanaryUtils.validate_config_file(
+        config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/pgp_pnpm_input.json'), 'r'))
-        assert IcecrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_PGP) is not None
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_PGP) is not None
 
-        config = IcecrustCanaryUtils.validate_config_file(
+        config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/pgpchecksumfile_pnpm_input.json'), 'r'))
-        assert IcecrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE)\
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE)\
                is not None
 
     def test_valid_verbose(self, mock_msg_callback):
-        config = IcecrustCanaryUtils.validate_config_file(
+        config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/compare_pnpm_input.json'), 'r'))
-        assert IcecrustCanaryUtils.extract_verification_data(config, VerificationModes.COMPARE_FILES,
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.COMPARE_FILES,
                                                              msg_callback=mock_msg_callback) is not None
         assert len(mock_msg_callback.messages) == 1
         assert mock_msg_callback.messages[0] ==\
@@ -137,11 +137,11 @@ class TestExtractVerificationData(object):
 
     def test_invalid(self):
         config = dict()
-        assert IcecrustCanaryUtils.extract_verification_data(config, VerificationModes.COMPARE_FILES) is None
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.COMPARE_FILES) is None
 
     def test_invalid_verbose(self, mock_msg_callback):
         config = dict()
-        assert IcecrustCanaryUtils.extract_verification_data(config, VerificationModes.COMPARE_FILES,
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.COMPARE_FILES,
                                                              msg_callback=mock_msg_callback) is None
         assert len(mock_msg_callback.messages) == 0
 
@@ -156,7 +156,7 @@ class TestGenerateJson(object):
         verification_mode = VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE
         verified_result = False
         cmd_output = ['foobar2', 'foobar3']
-        json_raw = IcecrustCanaryUtils.generate_json(config_data, verification_mode, verified_result, cmd_output)
+        json_raw = IcetrustCanaryUtils.generate_json(config_data, verification_mode, verified_result, cmd_output)
         json_parsed = json.loads(json_raw)
 
         schema_data = json.load(open(CANARY_OUTPUT_SCHEMA, 'r'))
@@ -174,29 +174,29 @@ class TestGenerateJson(object):
 # Tests for get_verification_mode method
 class TestGetVerificationMode(object):
     def test_valid(self):
-        config = IcecrustCanaryUtils.validate_config_file(
+        config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/compare_pnpm_input.json'), 'r'))
-        assert IcecrustCanaryUtils.get_verification_mode(config) == VerificationModes.COMPARE_FILES
+        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.COMPARE_FILES
 
-        config = IcecrustCanaryUtils.validate_config_file(
+        config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/checksum_pnpm_input.json'), 'r'))
-        assert IcecrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_CHECKSUM
+        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_CHECKSUM
 
-        config = IcecrustCanaryUtils.validate_config_file(
+        config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/checksumfile_pnpm_input.json'), 'r'))
-        assert IcecrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_CHECKSUMFILE
+        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_CHECKSUMFILE
 
-        config = IcecrustCanaryUtils.validate_config_file(
+        config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/pgp_pnpm_input.json'), 'r'))
-        assert IcecrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_PGP
+        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_PGP
 
-        config = IcecrustCanaryUtils.validate_config_file(
+        config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/pgpchecksumfile_pnpm_input.json'), 'r'))
-        assert IcecrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE
+        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE
 
     def test_invalid(self):
         config = dict()
-        assert IcecrustCanaryUtils.get_verification_mode(config) is None
+        assert IcetrustCanaryUtils.get_verification_mode(config) is None
 
 
 # Tests for get_algorithm method
@@ -204,22 +204,22 @@ class TestGetAlgorithm(object):
     def test_valid(self):
         verification_data = dict()
         verification_data['algorithm'] = 'sha1'
-        assert IcecrustCanaryUtils.get_algorithm(verification_data) == 'sha1'
+        assert IcetrustCanaryUtils.get_algorithm(verification_data) == 'sha1'
 
     def test_valid_default(self):
         verification_data = dict()
-        assert IcecrustCanaryUtils.get_algorithm(verification_data) == DEFAULT_HASH_ALGORITHM
+        assert IcetrustCanaryUtils.get_algorithm(verification_data) == DEFAULT_HASH_ALGORITHM
 
     def test_valid_verbose(self, mock_msg_callback):
         verification_data = dict()
         verification_data['algorithm'] = 'sha1'
-        assert IcecrustCanaryUtils.get_algorithm(verification_data, msg_callback=mock_msg_callback) == 'sha1'
+        assert IcetrustCanaryUtils.get_algorithm(verification_data, msg_callback=mock_msg_callback) == 'sha1'
         assert len(mock_msg_callback.messages) == 1
         assert mock_msg_callback.messages[0] == "Using algorithm: sha1"
 
     def test_valid_default_verbose(self, mock_msg_callback):
         verification_data = dict()
-        assert IcecrustCanaryUtils.get_algorithm(verification_data, msg_callback=mock_msg_callback)\
+        assert IcetrustCanaryUtils.get_algorithm(verification_data, msg_callback=mock_msg_callback)\
                == DEFAULT_HASH_ALGORITHM
         assert len(mock_msg_callback.messages) == 1
         assert mock_msg_callback.messages[0] == "Using algorithm: sha256"
@@ -228,29 +228,29 @@ class TestGetAlgorithm(object):
 # Tests for validate_config_file method
 class TestValidateConfigFile(object):
     def test_valid(self):
-        assert IcecrustCanaryUtils.validate_config_file(
+        assert IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/compare_pnpm_input.json'), 'r')) is not None
-        assert IcecrustCanaryUtils.validate_config_file(
+        assert IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/checksum_pnpm_input.json'), 'r')) is not None
-        assert IcecrustCanaryUtils.validate_config_file(
+        assert IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/checksumfile_pnpm_input.json'), 'r')) is not None
-        assert IcecrustCanaryUtils.validate_config_file(
+        assert IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/pgp_pnpm_input.json'), 'r')) is not None
-        assert IcecrustCanaryUtils.validate_config_file(
+        assert IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/pgpchecksumfile_pnpm_input.json'), 'r')) is not None
 
     def test_valid_verbose(self, mock_msg_callback):
-        assert IcecrustCanaryUtils.validate_config_file(
+        assert IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_input/compare_pnpm_input.json'), 'r'),
             msg_callback=mock_msg_callback) is not None
         assert len(mock_msg_callback.messages) == 0
 
     def test_invalid(self):
-        assert IcecrustCanaryUtils.validate_config_file(
+        assert IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_output/compare_pnpm_output_verified.json'), 'r')) is None
 
     def test_invalid_verbose(self, mock_msg_callback):
-        assert IcecrustCanaryUtils.validate_config_file(
+        assert IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, 'canary_output/compare_pnpm_output_verified.json'), 'r'),
             msg_callback=mock_msg_callback) is None
         assert len(mock_msg_callback.messages) == 2
