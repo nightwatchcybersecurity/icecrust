@@ -54,10 +54,11 @@ def _process_result(verification_result):
 
 @cli.command('canary')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
-@click.option('--output-json-file', required=False, type=click.Path(dir_okay=False, exists=False))
+@click.option('--output-json-file', required=False, type=click.Path(dir_okay=False, exists=False),
+              help='Output results of the command into a JSON file')
 @click.argument('configfile', required=True, type=click.File('r'))
 def canary(verbose, configfile, output_json_file, output_upptime_file):
-    """Does a canary check against a project"""
+    """Does a canary check against a project using information in CONFIGFILE"""
     # Setup objects to be used
     cmd_output = []
     msg_callback = IcetrustUtils.process_verbose_flag(verbose)
@@ -212,11 +213,12 @@ def verify_via_pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('checksumfile', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('signaturefile', required=True, type=click.Path(exists=True, dir_okay=False))
-@click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, type=click.Choice(['sha1', 'sha256', 'sha512'],
-                                                                               case_sensitive=False))
-@click.option('--keyfile', required=False, type=click.Path(exists=True, dir_okay=False))
-@click.option('--keyid', required=False)
-@click.option('--keyserver', required=False)
+@click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, help='Hash algorithm to be used (sha1, sha256 or sha512)',
+              type=click.Choice(['sha1', 'sha256', 'sha512'], case_sensitive=False))
+@click.option('--keyfile', required=False, type=click.Path(exists=True, dir_okay=False),
+              help='File containing PGP keys')
+@click.option('--keyid', required=False, help='PGP key ID')
+@click.option('--keyserver', required=False, help='Domain name of the PGP keyserver')
 def verify_via_pgpchecksumfile(verbose, filename, checksumfile, signaturefile, algorithm, keyfile, keyid, keyserver):
     """Verify FILENAME via a PGP-signed CHECKSUMFILE, with a signature in SIGNATUREFILE using provided keys"""
     # Check input parameters
