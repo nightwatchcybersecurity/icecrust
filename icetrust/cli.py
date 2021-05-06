@@ -54,10 +54,10 @@ def _process_result(verification_result):
 
 @cli.command('canary')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
-@click.option('--output-json-file', required=False, type=click.Path(dir_okay=False, exists=False),
+@click.option('--output-json', required=False, type=click.Path(dir_okay=False, exists=False),
               help='Output results of the command into a JSON file')
 @click.argument('configfile', required=True, type=click.File('r'))
-def canary(verbose, configfile, output_json_file):
+def canary(verbose, configfile, output_json):
     """Does a canary check against a project using information in CONFIGFILE"""
     # Setup objects to be used
     cmd_output = []
@@ -138,10 +138,10 @@ def canary(verbose, configfile, output_json_file):
         sys.exit(-1)
 
     # Generate JSON file if needed
-    if output_json_file is not None:
+    if output_json is not None:
         json_data = IcetrustCanaryUtils.generate_json(config_data, verification_mode, verification_result,
                                                         cmd_output, msg_callback)
-        output_json_stream = open(output_json_file, "w")
+        output_json_stream = open(output_json, "w")
         output_json_stream.write(json_data)
         output_json_stream.close()
 
