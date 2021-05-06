@@ -1,8 +1,0 @@
-{
-  "name": "pnpm",
-  "url": "https://pnpm.io/",
-  "filename_url": "https://get.pnpm.io/v6.js",
-  "verify_via_checksumfile": {
-    "checksumfile_url": "https://get.pnpm.io/SHASUMS256.txt"
-  }
-}

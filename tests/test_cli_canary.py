@@ -33,47 +33,47 @@ from test_utils import TEST_DIR
 # Tests for "canary" command()
 class TestCanary(object):
     @pytest.mark.network
-    def test_compare_invalid(self, tmp_path):
+    def test_compare_valid(self, tmp_path):
         runner = CliRunner()
-        result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'compare_pnpm_input.json')])
-        assert result.exit_code == -1
+        result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'compare.json')])
+        assert result.exit_code == 0
         assert result.output == 'Using verification mode: COMPARE_FILES\n' + \
-               'Downloading file: https://get.pnpm.io/v6.js\n' + \
-               'ERROR: File cannot be verified!\n'
+               'Downloading file: https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl\n' + \
+               'File verified\n'
 
     @pytest.mark.network
     def test_checksum_valid(self, tmp_path):
         runner = CliRunner()
-        result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'checksum_pnpm_input.json')])
+        result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'checksum.json')])
         assert result.exit_code == 0
         assert result.output == 'Using verification mode: VERIFY_VIA_CHECKSUM\n' + \
-               'Downloading file: https://get.pnpm.io/v6.js\n' + \
+               'Downloading file: https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl\n' + \
                'File verified\n'
 
     @pytest.mark.network
     def test_checksumfile_valid(self, tmp_path):
         runner = CliRunner()
-        result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'checksumfile_pnpm_input.json')])
+        result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'checksumfile.json')])
         assert result.exit_code == 0
         assert result.output == 'Using verification mode: VERIFY_VIA_CHECKSUMFILE\n' + \
-               'Downloading file: https://get.pnpm.io/v6.js\n' + \
+               'Downloading file: https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl\n' + \
                'File verified\n'
 
     @pytest.mark.network
-    def test_pgp_valid(self, tmp_path):
+    def test_pgp_keyfile_valid(self, tmp_path):
         runner = CliRunner()
-        result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'pgp_pnpm_input.json')])
+        result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'pgp_keyfile.json')])
         assert result.exit_code == 0
         assert result.output == 'Using verification mode: VERIFY_VIA_PGP\n' + \
-               'Downloading file: https://get.pnpm.io/SHASUMS256.txt\n' + \
+               'Downloading file: https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl\n' + \
                'File verified\n'
 
     @pytest.mark.network
-    def test_pgpchecksumfile_valid(self, tmp_path):
+    def test_pgpchecksumfile_keyfile_valid(self, tmp_path):
         runner = CliRunner()
-        result = runner.invoke(cli,
-                               ['canary', os.path.join(TEST_DIR, 'canary_input', 'pgpchecksumfile_pnpm_input.json')])
+        result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'pgpchecksumfile_keyfile.json')])
         assert result.exit_code == 0
         assert result.output == 'Using verification mode: VERIFY_VIA_PGPCHECKSUMFILE\n' + \
-               'Downloading file: https://get.pnpm.io/v6.js\n' + \
+               'Downloading file: https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl\n' + \
                'File verified\n'
+

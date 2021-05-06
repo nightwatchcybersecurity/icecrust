@@ -144,12 +144,6 @@ class TestUtilsPgpImportKeys(object):
         assert mock_msg_callback.messages[0] == '--- Results of key import ---\n'
         assert '[GNUPG:] IMPORTED FBFCC82A015E7330' in mock_msg_callback.messages[1]
 
-    @pytest.mark.network
-    def test_valid_fromkeyid(self, tmp_path):
-        gpg = IcetrustUtils.pgp_init(tmp_path)
-        assert IcetrustUtils.pgp_import_keys(gpg, keyserver='ipv4.pool.sks-keyservers.net',
-                                             keyid='DD8F2338BAE7501E3DD5AC78C273792F7D83545D') is True
-
     def test_invalid_file(self, tmp_path):
         gpg = IcetrustUtils.pgp_init(tmp_path)
         assert IcetrustUtils.pgp_import_keys(gpg, keyfile='foobar') is False

@@ -1,8 +1,0 @@
-{
-  "name": "pnpm",
-  "url": "https://pnpm.io/",
-  "filename_url": "https://get.pnpm.io/v6.js",
-  "compare_files": {
-    "file2_url": "https://cdn.jsdelivr.net/npm/pnpm@6.2.1/dist/pnpm.cjs"
-  }
-}

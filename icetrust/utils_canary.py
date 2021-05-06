@@ -114,8 +114,8 @@ class IcetrustCanaryUtils(object):
         # Download key file
         if verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
             if 'keyfile_url' in verification_data:
-                IcetrustCanaryUtils.download_file(verification_data['keyfile_url'], dir, dir + FILENAME_KEYS,
-                                                  msg_callback=msg_callback)
+                IcetrustCanaryUtils.download_file(verification_data['keyfile_url'], dir,
+                                                  os.path.join(dir, FILENAME_KEYS), msg_callback=msg_callback)
 
 
     @staticmethod
@@ -132,7 +132,7 @@ class IcetrustCanaryUtils(object):
         verbose = False
         if msg_callback:
             verbose = True
-        download(url, dir + filename, progressbar=verbose, verbose=verbose)
+        download(url, os.path.join(dir, filename), progressbar=verbose, verbose=verbose)
 
     @staticmethod
     def extract_verification_data(config, mode, msg_callback=None):
@@ -233,8 +233,8 @@ class IcetrustCanaryUtils(object):
 
         # Do the actual import
         import_result = IcetrustUtils.pgp_import_keys(gpg, keyfile=keyfile_path,
-                                                      keyid=verification_data['keyid'],
-                                                      keyserver=verification_data['keyserver'],
+                                                      keyid=None if keyfile_path else verification_data['keyid'],
+                                                      keyserver=None if keyfile_path else verification_data['keyserver'],
                                                       msg_callback=msg_callback)
         return import_result
 

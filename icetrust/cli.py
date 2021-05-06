@@ -57,7 +57,7 @@ def _process_result(verification_result):
 @click.option('--output-json-file', required=False, type=click.Path(dir_okay=False, exists=False),
               help='Output results of the command into a JSON file')
 @click.argument('configfile', required=True, type=click.File('r'))
-def canary(verbose, configfile, output_json_file, output_upptime_file):
+def canary(verbose, configfile, output_json_file):
     """Does a canary check against a project using information in CONFIGFILE"""
     # Setup objects to be used
     cmd_output = []

@@ -1,0 +1,10 @@
+{
+  "name": "truegaze",
+  "url": "https://github.com/nightwatchcybersecurity/truegaze",
+  "filename_url": "https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl",
+  "verify_via_pgp": {
+    "signaturefile_url": "https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl.asc",
+    "keyid": "C8EF5FF3BF864E50",
+    "keyserver": "keyserver.ubuntu.com"
+  }
+}
