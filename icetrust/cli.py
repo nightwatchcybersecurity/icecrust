@@ -21,7 +21,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import sys, tempfile
+import os, sys, tempfile
 
 import click
 from icetrust.utils import DEFAULT_HASH_ALGORITHM, IcetrustUtils
@@ -87,7 +87,7 @@ def canary(verbose, configfile, output_json_file):
 
     # Create temporary directory
     temp_dir_obj = tempfile.TemporaryDirectory()
-    temp_dir = temp_dir_obj.name + '/'
+    temp_dir = os.path.join(temp_dir_obj.name, '')
 
     # Download all of the files required
     IcetrustCanaryUtils.download_all_files(verification_mode, temp_dir, config_data['filename_url'],

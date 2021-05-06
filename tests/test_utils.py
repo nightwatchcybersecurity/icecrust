@@ -22,6 +22,7 @@
 # under the License.
 #
 import os, re, shutil
+import tempfile
 
 import gnupg, pytest
 
@@ -143,6 +144,24 @@ class TestUtilsPgpImportKeys(object):
         assert len(mock_msg_callback.messages) == 2
         assert mock_msg_callback.messages[0] == '--- Results of key import ---\n'
         assert '[GNUPG:] IMPORTED FBFCC82A015E7330' in mock_msg_callback.messages[1]
+
+    @pytest.mark.network
+    def test_valid_fromkeyid(self, mock_msg_callback):
+        # TODO: Switch to use tmp_path fixture
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        tmp_path = os.path.join(temp_dir_obj.name, '')
+        gpg = IcetrustUtils.pgp_init(tmp_path)
+        assert IcetrustUtils.pgp_import_keys(gpg, keyid='C8EF5FF3BF864E50', keyserver='keyserver.ubuntu.com',
+                                             msg_callback=mock_msg_callback) is True
+
+    @pytest.mark.network
+    def test_invalid_fromkeyid(self, mock_msg_callback):
+        # TODO: Switch to use tmp_path fixture
+        temp_dir_obj = tempfile.TemporaryDirectory()
+        tmp_path = os.path.join(temp_dir_obj.name, '')
+        gpg = IcetrustUtils.pgp_init(tmp_path)
+        assert IcetrustUtils.pgp_import_keys(gpg, keyid='foobar', keyserver='keyserver.ubuntu.com',
+                                             msg_callback=mock_msg_callback) is False
 
     def test_invalid_file(self, tmp_path):
         gpg = IcetrustUtils.pgp_init(tmp_path)
