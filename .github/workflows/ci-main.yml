@@ -24,6 +24,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        pip install codecov
         pip install -r requirements.txt
 
     - name: Run all unit tests
