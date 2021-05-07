@@ -1,5 +1,5 @@
 # icetrust
-[![PyPI version](https://badge.fury.io/py/icetrust.svg)](https://badge.fury.io/py/icetrust)
+![PyPI](https://img.shields.io/pypi/v/icetrust)
 [![Test package](https://github.com/nightwatchcybersecurity/icetrust/actions/workflows/ci-develop.yml/badge.svg)](https://github.com/nightwatchcybersecurity/icetrust/actions/workflows/ci-develop.yml)
 [![Extra tests on main branch only](https://github.com/nightwatchcybersecurity/icetrust/actions/workflows/ci-main.yml/badge.svg)](https://github.com/nightwatchcybersecurity/icetrust/actions/workflows/ci-main.yml)
 [![codecov](https://codecov.io/gh/nightwatchcybersecurity/icetrust/branch/main/graph/badge.svg?token=YvekypYOfw)](https://codecov.io/gh/nightwatchcybersecurity/icetrust)
