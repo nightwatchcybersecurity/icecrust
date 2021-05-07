@@ -1,3 +1,5 @@
+include CANARY.md
 include LICENSE
 include README.md
+include security.md
 include icetrust/data/*.*
