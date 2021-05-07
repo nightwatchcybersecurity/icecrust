@@ -84,12 +84,13 @@ class IcetrustUtils(object):
             return False
 
     @staticmethod
-    def pgp_import_keys(gpg, msg_callback=None, keyfile=None, keyid=None, keyserver=None):
+    def pgp_import_keys(gpg, msg_callback=None, cmd_output=None, keyfile=None, keyid=None, keyserver=None):
         """
         Imports GPG keys into the gpg instance
 
         :param gpg: initialized gpg instance
         :param msg_callback: message callback object, can be used to collect additional data via .echo()
+        :param cmd_output: Additional data to be used for JSON output
         :param keyfile: file containing PGP keys to be imported
         :param keyid: ID of the key to be imported from a key server
         :param keyserver: domain name of the key server to be used
@@ -113,9 +114,13 @@ class IcetrustUtils(object):
             import_result = gpg.import_keys(keydata)
         else:
             import_result = gpg.recv_keys(keyserver, keyid)
+
         if msg_callback:
             msg_callback.echo('--- Results of key import ---\n')
             msg_callback.echo(import_result.stderr)
+
+        if cmd_output is not None:
+            cmd_output.append(import_result.stderr)
 
         # Return results
         if import_result.imported == 0:

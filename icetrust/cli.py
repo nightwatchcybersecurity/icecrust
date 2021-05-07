@@ -99,9 +99,14 @@ def canary(verbose, configfile, output_json):
         gpg = IcetrustUtils.pgp_init(gpg_home_dir=temp_dir_obj.name)
 
         # Import keys if needed
+        import_output = []
         import_result = IcetrustCanaryUtils.import_key_material(gpg, temp_dir, verification_data,
+                                                                cmd_output=import_output,
                                                                 msg_callback=msg_callback)
         if import_result is False:
+            json_data = IcetrustCanaryUtils.generate_json(config_data, verification_mode, import_result,
+                                                          import_output, msg_callback)
+            open(output_json, "w").write(json_data)
             _process_result(import_result)
 
     # Main operation code
@@ -141,9 +146,7 @@ def canary(verbose, configfile, output_json):
     if output_json is not None:
         json_data = IcetrustCanaryUtils.generate_json(config_data, verification_mode, verification_result,
                                                         cmd_output, msg_callback)
-        output_json_stream = open(output_json, "w")
-        output_json_stream.write(json_data)
-        output_json_stream.close()
+        open(output_json, "w").write(json_data)
 
     _process_result(verification_result)
 

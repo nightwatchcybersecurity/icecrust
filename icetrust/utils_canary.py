@@ -216,7 +216,7 @@ class IcetrustCanaryUtils(object):
         return algorithm
 
     @staticmethod
-    def import_key_material(gpg, dir, verification_data, msg_callback=None):
+    def import_key_material(gpg, dir, verification_data, cmd_output=None, msg_callback=None):
         """
         Import keys if needed
 
@@ -224,6 +224,7 @@ class IcetrustCanaryUtils(object):
         :param dir: directory to download to
         :param filename_url: URL for the main file to be downloaded
         :param verification_data: parsed JSON containing verification data
+        :param cmd_output: command output
         :param msg_callback: message callback object, can be used to collect additional data via .echo()
         :return: True if succesful, False if not, None if skipped
         """
@@ -235,6 +236,7 @@ class IcetrustCanaryUtils(object):
         import_result = IcetrustUtils.pgp_import_keys(gpg, keyfile=keyfile_path,
                                                       keyid=None if keyfile_path else verification_data['keyid'],
                                                       keyserver=None if keyfile_path else verification_data['keyserver'],
+                                                      cmd_output=cmd_output,
                                                       msg_callback=msg_callback)
         return import_result
 
