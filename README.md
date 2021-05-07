@@ -2,7 +2,7 @@
 [![PyPI version](https://badge.fury.io/py/icetrust.svg)](https://badge.fury.io/py/icetrust)
 [![Test package](https://github.com/nightwatchcybersecurity/icetrust/actions/workflows/ci-develop.yml/badge.svg)](https://github.com/nightwatchcybersecurity/icetrust/actions/workflows/ci-develop.yml)
 [![Extra tests on main branch only](https://github.com/nightwatchcybersecurity/icetrust/actions/workflows/ci-main.yml/badge.svg)](https://github.com/nightwatchcybersecurity/icetrust/actions/workflows/ci-main.yml)
-[![codecov](https://codecov.io/gh/nightwatchcybersecurity/icetrust/branch/master/graph/badge.svg)](https://codecov.io/gh/nightwatchcybersecurity/icetrust)
+[![codecov](https://codecov.io/gh/nightwatchcybersecurity/icetrust/branch/main/graph/badge.svg?token=YvekypYOfw)](https://codecov.io/gh/nightwatchcybersecurity/icetrust)
 ![GitHub](https://img.shields.io/github/license/nightwatchcybersecurity/icetrust.svg)
 
 # What is this?
