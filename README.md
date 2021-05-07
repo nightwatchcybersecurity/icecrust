@@ -38,7 +38,7 @@ python -m icetrust.cli
 
 # How to use 
 There are two main modes that this tool can be used in:
-1. For project owners: ["canary" mode](CANARY.MD) can be used to
+1. For project owners: ["canary" mode](CANARY.md) can be used to
    download and verify project files on a regular basis 
    to detect supply chain attacks.
 2. For end users: this tool can be used for verification of
@@ -54,7 +54,7 @@ verification, please use those instead. This tool is only intended for users who
 comfortable with that approach.***
 
 ## Canary Mode
-See [CANARY.MD](CANARY.MD) for help. 
+See [CANARY.md](CANARY.md) for help. 
 
 Live demos can be viewed here:
 - [icetrust_dashboard.nightwatchcybersecurity.com](https://icetrust_dashboard.nightwatchcybersecurity.com)
@@ -167,8 +167,6 @@ ERROR: File cannot be verified!
 
 Successful verification will return 0. Any errors or failed verification
 will result in a non-zero return.
-
-For more advanced automation, see [CANARY.MD](CANARY.MD).
 
 # Development Information
 
