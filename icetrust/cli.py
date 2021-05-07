@@ -94,7 +94,7 @@ def canary(verbose, configfile, output_json):
                                            verification_data, msg_callback=msg_callback)
 
     # Import keys for those operations that need it
-    if verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
+    if verification_mode in [VerificationModes.PGP, VerificationModes.PGPCHECKSUMFILE]:
         # Initialize PGP
         gpg = IcetrustUtils.pgp_init(gpg_home_dir=temp_dir_obj.name)
 
@@ -168,7 +168,7 @@ def compare_files(verbose, file1, file2):
 @click.argument('checksum_value', required=True)
 @click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, help='Hash algorithm to be used (sha1, sha256 or sha512)',
               type=click.Choice(['sha1', 'sha256', 'sha512'], case_sensitive=False))
-def verify_via_checksum(verbose, filename, checksum_value, algorithm):
+def checksum(verbose, filename, checksum_value, algorithm):
     """Verify FILENAME against the CHECKSUM_VALUE"""
     checksum_valid = IcetrustUtils.verify_checksum(filename, algorithm, checksum_value=checksum_value,
                                                    msg_callback=IcetrustUtils.process_verbose_flag(verbose))
@@ -181,7 +181,7 @@ def verify_via_checksum(verbose, filename, checksum_value, algorithm):
 @click.argument('checksumfile', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.option('--algorithm', default=DEFAULT_HASH_ALGORITHM, help='Hash algorithm to be used (sha1, sha256 or sha512)',
               type=click.Choice(['sha1', 'sha256', 'sha512'], case_sensitive=False))
-def verify_via_checksumfile(verbose, filename, checksumfile, algorithm):
+def checksumfile(verbose, filename, checksumfile, algorithm):
     """Verify FILENAME against a checksum value in the CHECKSUMFILE"""
     checksum_valid = IcetrustUtils.verify_checksum(filename, algorithm, checksumfile=checksumfile,
                                                    msg_callback=IcetrustUtils.process_verbose_flag(verbose))
@@ -196,7 +196,7 @@ def verify_via_checksumfile(verbose, filename, checksumfile, algorithm):
               help='File containing PGP keys')
 @click.option('--keyid', required=False, help='PGP key ID')
 @click.option('--keyserver', required=False, help='Domain name of the PGP keyserver')
-def verify_via_pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
+def pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
     """Verify FILENAME via a PGP signature in SIGNATUREFILE using provided keys"""
     # Check input parameters
     if keyfile is None and (keyid is None or keyserver is None):
@@ -227,7 +227,7 @@ def verify_via_pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
               help='File containing PGP keys')
 @click.option('--keyid', required=False, help='PGP key ID')
 @click.option('--keyserver', required=False, help='Domain name of the PGP keyserver')
-def verify_via_pgpchecksumfile(verbose, filename, checksumfile, signaturefile, algorithm, keyfile, keyid, keyserver):
+def pgpchecksumfile(verbose, filename, checksumfile, signaturefile, algorithm, keyfile, keyid, keyserver):
     """Verify FILENAME via a PGP-signed CHECKSUMFILE, with a signature in SIGNATUREFILE using provided keys"""
     # Check input parameters
     if keyfile is None and (keyid is None or keyserver is None):
