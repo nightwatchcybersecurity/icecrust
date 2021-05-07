@@ -1,8 +1,8 @@
-name: Extra tests on master branch only
+name: Extra tests on main branch only
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -26,7 +26,18 @@ jobs:
       run: |
         pip install -r requirements.txt
 
-    - name: Run extra unit tests
+    - name: Run all unit tests
       run: |
-        python -m pytest --run-optional-tests=network,slow
+        python -m pytest --run-optional-tests=network,slow --cov=icetrust/ --cov-report=xml
         codecov
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+
+    - name: Test package build and install
+      run: |
+        python setup.py install
+        icetrust --version
+        icetrust verify_via_checksumfile test_data/file1.txt test_data/file1.txt.SHA256SUMS
