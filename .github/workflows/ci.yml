@@ -27,7 +27,7 @@ jobs:
 
     - name: Run unit tests
       run: |
-        python -m pytest --cov=icetrust/ --cov-report=xml
+        python -m pytest --run-optional-tests=slow --cov=icetrust/ --cov-report=xml
         codecov
 
     - name: Upload coverage to Codecov

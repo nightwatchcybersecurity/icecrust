@@ -27,16 +27,22 @@ The various verification options and details are the same as the main utility, e
 canary mode will download the various files involved into a temporary directly before
 verification.
 
-# Example dashboards
+## Example dashboards
 This mode can be used in automation as a scheduled job to run the checks. 
 There are two examples of what this looks like in practice:
 - [icetrust_dashboard_example](https://github.com/nightwatchcybersecurity/icetrust_dashboard_example) -
-  a single-page dashboard showing verification status
-- [icetrust_upptime_example](https://github.com/nightwatchcybersecurity/icetrust_upptime_example) -
-  an "uptime" dashboard, similar to uptime status pages used
-by websites
+  a single-page dashboard showing verification status, based on Jekyll and
+  some basic scripting
+- [icetrust_u~~~~ptime_example](https://github.com/nightwatchcybersecurity/icetrust_upptime_example) -
+  an "uptime" dashboard, similar to uptime status pages used by regular
+  websites. Based on some scripting and the "upptime" project.
 
-# Reporting bugs and feature requests
+## Live Demos  
+Live demos can be viewed here:
+- [icetrust_dashboard.nightwatchcybersecurity.com](https://icetrust_dashboard.nightwatchcybersecurity.com)
+- [icetrust_uptime.nightwatchcybersecurity.com](https://icetrust_uptime.nightwatchcybersecurity.com)
+
+## Reporting bugs and feature requests
 Please use the GitHub issue tracker to report issues or suggest features:
 https://github.com/nightwatchcybersecurity/icetrust
 

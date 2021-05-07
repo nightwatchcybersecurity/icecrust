@@ -14,15 +14,21 @@ was prompted by [the recent supply chain attack against codecov.io](https://abou
 Python 3 is required and you can find all required modules in the **requirements.txt** file.
 Only tested on Python 3.9 but should work on other 3.x releases.
 
-You must also have GnuPG installed.
+You also must have GnuPG installed.
 
 ## Installation
-You can install this via PIP as follows:
+Check if GnuPG is installed:
+```
+gpg --version
+```
+
+Install this project via PIP:
 ```
 pip install icetrust
 icetrust --version
 ```
-To download and run manually, do the following:
+
+Alternatively, you can download and run manually:
 ```
 git clone https://github.com/nightwatchcybersecurity/icetrust.git
 cd icetrust
@@ -32,21 +38,28 @@ python -m icetrust.cli
 
 # How to use 
 There are two main modes that this tool can be used in:
-1. For project owners: ["canary" mode](CANARY.MD) to download and verify project files on a regular basis
-to detect supply chain attacks.
-2. For end users: verification of already downloaded files against checksums or PGP.
+1. For project owners: ["canary" mode](CANARY.MD) can be used to
+   download and verify project files on a regular basis 
+   to detect supply chain attacks.
+2. For end users: this tool can be used for verification of
+   already downloaded files against checksums or PGP.
 
-If you are using a key ID, this utility will attempt to connect to a PGP server. If you use a keyfile,
+If you are using a PGP key ID, this utility will attempt to connect to a PGP server. If you use a keyfile,
 the verification will be done entirely off-line.  This utility will not modify or use your PGP keyrings, instead a temporary directory is created for this purpose.
 While this is less efficient and somewhat less secure, it is easier for a lot of users since it avoids the
 complexity of managing PGP keys.
 
-***NOTE***: if you are comfortable with using GnuPG and native OS command line tools for
+***NOTE: if you are comfortable with using GnuPG and native OS command line tools for
 verification, please use those instead. This tool is only intended for users who are not yet
-comfortable with that approach.
+comfortable with that approach.***
 
 ## Canary Mode
-See [CANARY.MD](CANARY.MD) for help.
+See [CANARY.MD](CANARY.MD) for help. 
+
+Live demos can be viewed here:
+- [icetrust_dashboard.nightwatchcybersecurity.com](https://icetrust_dashboard.nightwatchcybersecurity.com)
+- [icetrust_uptime.nightwatchcybersecurity.com](https://icetrust_uptime.nightwatchcybersecurity.com)
+
 
 ## Verification modes
 This tool offers the following verification modes to verify downloaded files:
@@ -70,7 +83,7 @@ curl -O https://www1.example.com/software1.zip
 curl -O https://www2.example.com/software2.zip
 ```
 
-Compare the files (SHA-256 is used):
+Compare the files (SHA-256 is used behind the scenes):
 ```
 icetrust compare_files software1.zip software2.zip
 ```
