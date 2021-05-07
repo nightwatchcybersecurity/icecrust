@@ -33,7 +33,7 @@ There are two examples of what this looks like in practice:
 - [icetrust_dashboard_example](https://github.com/nightwatchcybersecurity/icetrust_dashboard_example) -
   a single-page dashboard showing verification status, based on Jekyll and
   some basic scripting
-- [icetrust_u~~~~ptime_example](https://github.com/nightwatchcybersecurity/icetrust_upptime_example) -
+- [icetrust_uptime_example](https://github.com/nightwatchcybersecurity/icetrust_uptime_example) -
   an "uptime" dashboard, similar to uptime status pages used by regular
   websites. Based on some scripting and the "upptime" project.
 
