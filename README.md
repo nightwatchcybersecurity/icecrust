@@ -4,6 +4,7 @@
 [![Extra tests on main branch only](https://github.com/nightwatchcybersecurity/icetrust/actions/workflows/ci-main.yml/badge.svg)](https://github.com/nightwatchcybersecurity/icetrust/actions/workflows/ci-main.yml)
 [![codecov](https://codecov.io/gh/nightwatchcybersecurity/icetrust/branch/main/graph/badge.svg?token=YvekypYOfw)](https://codecov.io/gh/nightwatchcybersecurity/icetrust)
 ![GitHub](https://img.shields.io/github/license/nightwatchcybersecurity/icetrust.svg)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/icetrust)
 
 # What is this?
 A tool for verification of software downloads using checksums and/or PGP.
