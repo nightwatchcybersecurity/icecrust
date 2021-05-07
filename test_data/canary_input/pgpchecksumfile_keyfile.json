@@ -2,7 +2,7 @@
   "name": "truegaze",
   "url": "https://github.com/nightwatchcybersecurity/truegaze",
   "filename_url": "https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl",
-  "verify_via_pgpchecksumfile": {
+  "pgpchecksumfile": {
     "checksumfile_url": "https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl.sha256",
     "signaturefile_url": "https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl.sha256.asc",
     "keyfile_url": "https://raw.githubusercontent.com/nightwatchcybersecurity/truegaze/master/pgp_keys.asc"

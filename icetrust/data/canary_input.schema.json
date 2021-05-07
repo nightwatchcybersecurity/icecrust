@@ -5,10 +5,10 @@
   "required": ["name", "filename_url"],
   "anyOf": [
     { "required": [ "compare_files" ] },
-    { "required": [ "verify_via_checksum" ] },
-    { "required": [ "verify_via_checksumfile" ] },
-    { "required": [ "verify_via_pgp" ] },
-    { "required": [ "verify_via_pgpchecksumfile" ] }
+    { "required": [ "checksum" ] },
+    { "required": [ "checksumfile" ] },
+    { "required": [ "pgp" ] },
+    { "required": [ "pgpchecksumfile" ] }
   ],
   "properties": {
     "name": { "type": "string", "title": "Name of the project/tool being verified"
@@ -26,10 +26,10 @@
       "pattern": "^https://(.*)$"
      },
     "compare_files": { "$ref": "#/definitions/compare_files" },
-    "verify_via_checksum": { "$ref": "#/definitions/verify_via_checksum" },
-    "verify_via_checksumfile": { "$ref": "#/definitions/verify_via_checksumfile" },
-    "verify_via_pgp": { "$ref": "#/definitions/verify_via_pgp" },
-    "verify_via_pgpchecksumfile": { "$ref": "#/definitions/verify_via_pgpchecksumfile" }
+    "checksum": { "$ref": "#/definitions/checksum" },
+    "checksumfile": { "$ref": "#/definitions/checksumfile" },
+    "pgp": { "$ref": "#/definitions/pgp" },
+    "pgpchecksumfile": { "$ref": "#/definitions/pgpchecksumfile" }
   },
   "definitions": {
     "compare_files": {
@@ -43,7 +43,7 @@
       },
       "required": ["file2_url"]
     },
-    "verify_via_checksum": {
+    "checksum": {
       "type": "object",
       "properties": {
         "checksum_value": {
@@ -53,7 +53,7 @@
       },
       "required": ["checksum_value"]
     },
-    "verify_via_checksumfile": {
+    "checksumfile": {
       "type": "object",
       "properties": {
         "checksumfile_url": { "$ref": "#/definitions/checksumfile_url" },
@@ -61,7 +61,7 @@
       },
       "required": ["checksumfile_url"]
     },
-    "verify_via_pgp": {
+    "pgp": {
       "type": "object",
       "properties": {
         "signaturefile_url": { "$ref": "#/definitions/signaturefile_url" },
@@ -75,7 +75,7 @@
         { "required": [ "keyfile_url" ] }
       ]
     },
-    "verify_via_pgpchecksumfile": {
+    "pgpchecksumfile": {
       "type": "object",
       "properties": {
         "checksumfile_url": { "$ref": "#/definitions/checksumfile_url" },

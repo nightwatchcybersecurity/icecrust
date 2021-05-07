@@ -3,7 +3,7 @@
     "url": "https://github.com/nightwatchcybersecurity/truegaze",
     "timestamp": "2021-05-06T19:53:52.957716-04:00",
     "filename_url": "https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7.tar.gz",
-    "verification_mode": "verify_via_checksum",
+    "verification_mode": "checksum",
     "verified": false,
     "output": "Algorithm: sha256, File checksum: 3a263b9e0e1af48a632dc506b596549c4985f69496eefce3ea5833f9f8fc57b8, Checksum to check against: 9a8aab2ff0a7855556253732217932bbeb92e9756070786a7f90ded356a1c9a5df06"
 }

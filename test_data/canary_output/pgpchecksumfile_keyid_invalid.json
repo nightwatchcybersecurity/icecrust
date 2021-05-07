@@ -3,7 +3,7 @@
     "url": "https://github.com/nightwatchcybersecurity/truegaze",
     "timestamp": "2021-05-06T20:24:38.636002-04:00",
     "filename_url": "https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl",
-    "verification_mode": "verify_via_pgpchecksumfile",
+    "verification_mode": "pgpchecksumfile",
     "verified": false,
     "output": "gpg: keybox '/var/folders/kq/k45vwbk9447g90cz3_t47rww0000gn/T/tmpo9jyk16q/pubring.kbx' created\ngpg: \"dddd\" not a key ID: skipping\n"
 }

@@ -43,13 +43,14 @@ FILENAME_KEYS = "pgp_keys.txt"
 FILENAME_CHECKSUM = "checksum.dat"
 FILENAME_SIGNATURE = "signature.dat"
 
+
 # List of available verification modes, based on the command line options in the main CLI class
 class VerificationModes(Enum):
     COMPARE_FILES = 'compare_files',
-    VERIFY_VIA_CHECKSUM = 'verify_via_checksum',
-    VERIFY_VIA_CHECKSUMFILE = 'verify_via_checksumfile',
-    VERIFY_VIA_PGP = 'verify_via_pgp',
-    VERIFY_VIA_PGPCHECKSUMFILE = 'verify_via_pgpchecksumfile'
+    CHECKSUM = 'checksum',
+    CHECKSUMFILE = 'checksumfile',
+    PGP = 'pgp',
+    PGPCHECKSUMFILE = 'pgpchecksumfile'
 
 
 class IcetrustCanaryUtils(object):
@@ -68,11 +69,11 @@ class IcetrustCanaryUtils(object):
         file2_url = None
         if verification_mode == VerificationModes.COMPARE_FILES:
             file2_url = urlparse(verification_data['file2_url'])
-        elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUM:
+        elif verification_mode == VerificationModes.CHECKSUM:
             pass
-        elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUMFILE:
+        elif verification_mode == VerificationModes.CHECKSUMFILE:
             file2_url = urlparse(verification_data['checksumfile_url'])
-        elif verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE] \
+        elif verification_mode in [VerificationModes.PGP, VerificationModes.PGPCHECKSUMFILE] \
                 and 'keyfile_url' in verification_data:
             file2_url = urlparse(verification_data['keyfile_url'])
 
@@ -101,18 +102,18 @@ class IcetrustCanaryUtils(object):
                                               msg_callback=msg_callback)
 
         # Download checksum files
-        if verification_mode in [VerificationModes.VERIFY_VIA_CHECKSUMFILE,
-                                 VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
+        if verification_mode in [VerificationModes.CHECKSUMFILE,
+                                 VerificationModes.PGPCHECKSUMFILE]:
             IcetrustCanaryUtils.download_file(verification_data['checksumfile_url'], dir, FILENAME_CHECKSUM,
                                               msg_callback=msg_callback)
 
         # Download signature files
-        if verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
+        if verification_mode in [VerificationModes.PGP, VerificationModes.PGPCHECKSUMFILE]:
             IcetrustCanaryUtils.download_file(verification_data['signaturefile_url'], dir, FILENAME_SIGNATURE,
                                               msg_callback=msg_callback)
 
         # Download key file
-        if verification_mode in [VerificationModes.VERIFY_VIA_PGP, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE]:
+        if verification_mode in [VerificationModes.PGP, VerificationModes.PGPCHECKSUMFILE]:
             if 'keyfile_url' in verification_data:
                 IcetrustCanaryUtils.download_file(verification_data['keyfile_url'], dir,
                                                   os.path.join(dir, FILENAME_KEYS), msg_callback=msg_callback)

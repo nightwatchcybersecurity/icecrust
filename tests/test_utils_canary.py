@@ -37,10 +37,10 @@ class TestCanaryUtils(object):
     def test_const_verification_modes(self):
         assert len(VerificationModes) == 5
         assert VerificationModes['COMPARE_FILES'] is not None
-        assert VerificationModes['VERIFY_VIA_CHECKSUM'] is not None
-        assert VerificationModes['VERIFY_VIA_CHECKSUMFILE'] is not None
-        assert VerificationModes['VERIFY_VIA_PGP'] is not None
-        assert VerificationModes['VERIFY_VIA_PGPCHECKSUMFILE'] is not None
+        assert VerificationModes['CHECKSUM'] is not None
+        assert VerificationModes['CHECKSUMFILE'] is not None
+        assert VerificationModes['PGP'] is not None
+        assert VerificationModes['PGPCHECKSUMFILE'] is not None
 
     def test_canary_schemas_valid(self):
         input_schema = json.load(open(CANARY_INPUT_SCHEMA, 'r'))
@@ -122,29 +122,29 @@ class TestExtractVerificationData(object):
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'checksum.json')), 'r'))
-        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_CHECKSUM) is not None
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.CHECKSUM) is not None
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'checksumfile.json')), 'r'))
-        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_CHECKSUMFILE)\
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.CHECKSUMFILE)\
                is not None
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'pgp_keyfile.json')), 'r'))
-        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_PGP) is not None
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.PGP) is not None
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'pgp_keyid.json')), 'r'))
-        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_PGP) is not None
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.PGP) is not None
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'pgpchecksumfile_keyfile.json')), 'r'))
-        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE)\
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.PGPCHECKSUMFILE)\
                is not None
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'pgpchecksumfile_keyid.json')), 'r'))
-        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE)\
+        assert IcetrustCanaryUtils.extract_verification_data(config, VerificationModes.PGPCHECKSUMFILE)\
                is not None
 
     def test_valid_verbose(self, mock_msg_callback):
@@ -174,7 +174,7 @@ class TestGenerateJson(object):
         config_data['name'] = 'foobar1'
         config_data['url'] = 'https://www.example.com'
         config_data['filename_url'] = 'https://www.example.com/file.sh'
-        verification_mode = VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE
+        verification_mode = VerificationModes.PGPCHECKSUMFILE
         verified_result = False
         cmd_output = ['foobar2', 'foobar3']
         json_raw = IcetrustCanaryUtils.generate_json(config_data, verification_mode, verified_result, cmd_output)
@@ -187,7 +187,7 @@ class TestGenerateJson(object):
         assert(json_parsed['name']) == config_data['name']
         assert(json_parsed['url']) == config_data['url']
         assert(json_parsed['filename_url']) == config_data['filename_url']
-        assert(json_parsed['verification_mode']) == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE.value
+        assert(json_parsed['verification_mode']) == VerificationModes.PGPCHECKSUMFILE.value
         assert (json_parsed['verified']) == verified_result
         assert (json_parsed['output']) == ', '.join(cmd_output)
 
@@ -201,27 +201,27 @@ class TestGetVerificationMode(object):
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'checksum.json')), 'r'))
-        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_CHECKSUM
+        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.CHECKSUM
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'checksumfile.json')), 'r'))
-        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_CHECKSUMFILE
+        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.CHECKSUMFILE
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'pgp_keyfile.json')), 'r'))
-        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_PGP
+        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.PGP
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'pgp_keyid.json')), 'r'))
-        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_PGP
+        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.PGP
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'pgpchecksumfile_keyfile.json')), 'r'))
-        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE
+        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.PGPCHECKSUMFILE
 
         config = IcetrustCanaryUtils.validate_config_file(
             open(os.path.join(TEST_DIR, os.path.join('canary_input', 'pgpchecksumfile_keyid.json')), 'r'))
-        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE
+        assert IcetrustCanaryUtils.get_verification_mode(config) == VerificationModes.PGPCHECKSUMFILE
 
     def test_invalid(self):
         config = dict()

@@ -35,10 +35,10 @@
       "type": "string",
       "enum": [
         "compare_files",
-        "verify_via_checksum",
-        "verify_via_checksumfile", 
-        "verify_via_pgp", 
-        "verify_via_pgpchecksumfile"
+        "checksum",
+        "checksumfile",
+        "pgp",
+        "pgpchecksumfile"
       ],
       "title": "Verification mode used"
      },

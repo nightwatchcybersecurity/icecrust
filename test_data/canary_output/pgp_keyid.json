@@ -3,7 +3,7 @@
     "url": "https://github.com/nightwatchcybersecurity/truegaze",
     "timestamp": "2021-05-06T19:52:02.482291-04:00",
     "filename_url": "https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl",
-    "verification_mode": "verify_via_pgp",
+    "verification_mode": "pgp",
     "verified": true,
     "output": ""
 }

@@ -46,7 +46,7 @@ class TestCanary(object):
         runner = CliRunner()
         result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'checksum.json')])
         assert result.exit_code == 0
-        assert result.output == 'Using verification mode: VERIFY_VIA_CHECKSUM\n' + \
+        assert result.output == 'Using verification mode: CHECKSUM\n' + \
                'Downloading file: https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl\n' + \
                'File verified\n'
 
@@ -55,7 +55,7 @@ class TestCanary(object):
         runner = CliRunner()
         result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'checksumfile.json')])
         assert result.exit_code == 0
-        assert result.output == 'Using verification mode: VERIFY_VIA_CHECKSUMFILE\n' + \
+        assert result.output == 'Using verification mode: CHECKSUMFILE\n' + \
                'Downloading file: https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl\n' + \
                'File verified\n'
 
@@ -64,7 +64,7 @@ class TestCanary(object):
         runner = CliRunner()
         result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'pgp_keyfile.json')])
         assert result.exit_code == 0
-        assert result.output == 'Using verification mode: VERIFY_VIA_PGP\n' + \
+        assert result.output == 'Using verification mode: PGP\n' + \
                'Downloading file: https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl\n' + \
                'File verified\n'
 
@@ -73,7 +73,7 @@ class TestCanary(object):
         runner = CliRunner()
         result = runner.invoke(cli, ['canary', os.path.join(TEST_DIR, 'canary_input', 'pgpchecksumfile_keyfile.json')])
         assert result.exit_code == 0
-        assert result.output == 'Using verification mode: VERIFY_VIA_PGPCHECKSUMFILE\n' + \
+        assert result.output == 'Using verification mode: PGPCHECKSUMFILE\n' + \
                'Downloading file: https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl\n' + \
                'File verified\n'
 

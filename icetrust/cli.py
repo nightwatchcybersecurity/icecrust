@@ -114,20 +114,20 @@ def canary(verbose, configfile, output_json):
     if verification_mode == VerificationModes.COMPARE_FILES:
         verification_result = IcetrustUtils.compare_files(temp_dir + FILENAME_FILE1, temp_dir + FILENAME_FILE2,
                                                           msg_callback=msg_callback, cmd_output=cmd_output)
-    elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUM:
+    elif verification_mode == VerificationModes.CHECKSUM:
         algorithm = IcetrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
         verification_result = IcetrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
                                                             checksum_value=verification_data['checksum_value'],
                                                             msg_callback=msg_callback, cmd_output=cmd_output)
-    elif verification_mode == VerificationModes.VERIFY_VIA_CHECKSUMFILE:
+    elif verification_mode == VerificationModes.CHECKSUMFILE:
         algorithm = IcetrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
         verification_result = IcetrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
                                                             checksumfile=temp_dir + FILENAME_CHECKSUM,
                                                             msg_callback=msg_callback, cmd_output=cmd_output)
-    elif verification_mode == VerificationModes.VERIFY_VIA_PGP:
+    elif verification_mode == VerificationModes.PGP:
         verification_result = IcetrustUtils.pgp_verify(gpg, temp_dir + FILENAME_FILE1, temp_dir + FILENAME_SIGNATURE,
                                                        msg_callback=msg_callback, cmd_output=cmd_output)
-    elif verification_mode == VerificationModes.VERIFY_VIA_PGPCHECKSUMFILE:
+    elif verification_mode == VerificationModes.PGPCHECKSUMFILE:
         # Verify the signature of the checksum file first
         signature_result = IcetrustUtils.pgp_verify(gpg, temp_dir + FILENAME_CHECKSUM, temp_dir + FILENAME_SIGNATURE,
                                                     msg_callback=msg_callback, cmd_output=cmd_output)
@@ -162,7 +162,7 @@ def compare_files(verbose, file1, file2):
     _process_result(comparison_result)
 
 
-@cli.command('verify_via_checksum')
+@cli.command('checksum')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('checksum_value', required=True)
@@ -175,7 +175,7 @@ def verify_via_checksum(verbose, filename, checksum_value, algorithm):
     _process_result(checksum_valid)
 
 
-@cli.command('verify_via_checksumfile')
+@cli.command('checksumfile')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('checksumfile', required=True, type=click.Path(exists=True, dir_okay=False))
@@ -188,7 +188,7 @@ def verify_via_checksumfile(verbose, filename, checksumfile, algorithm):
     _process_result(checksum_valid)
 
 
-@cli.command('verify_via_pgp')
+@cli.command('pgp')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('signaturefile', required=True, type=click.Path(exists=True, dir_okay=False))
@@ -216,7 +216,7 @@ def verify_via_pgp(verbose, filename, signaturefile, keyfile, keyid, keyserver):
     _process_result(verification_result)
 
 
-@cli.command('verify_via_pgpchecksumfile')
+@cli.command('pgpchecksumfile')
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.argument('filename', required=True, type=click.Path(exists=True, dir_okay=False))
 @click.argument('checksumfile', required=True, type=click.Path(exists=True, dir_okay=False))
