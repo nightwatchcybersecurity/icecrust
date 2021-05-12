@@ -144,7 +144,7 @@ class TestCliVerifyChecksum(object):
         result = runner.invoke(cli, ['checksum', '--algorithm', 'foobar',
                                      os.path.join(TEST_DIR, 'file1.txt'), FILE2_HASH])
         assert result.exit_code == 2
-        assert "Error: Invalid value for '--algorithm': invalid choice: foobar." in result.output
+        assert "Error: Invalid value for '--algorithm'" in result.output
 
 
 # Tests for "checksumfile" option
@@ -198,7 +198,7 @@ class TestCliVerifyChecksumFile(object):
                                      os.path.join(TEST_DIR, 'file1.txt'),
                                      os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS')])
         assert result.exit_code == 2
-        assert "Error: Invalid value for '--algorithm': invalid choice: foobar." in result.output
+        assert "Error: Invalid value for '--algorithm'" in result.output
 
     def test_invalid_bad_arguments_missing_checksumfile(self):
         runner = CliRunner()
