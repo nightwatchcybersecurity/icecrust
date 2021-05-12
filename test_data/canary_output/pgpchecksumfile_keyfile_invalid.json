@@ -3,6 +3,7 @@
     "url": "https://github.com/nightwatchcybersecurity/truegaze",
     "timestamp": "2021-05-06T20:02:11.062958-04:00",
     "filename_url": "https://github.com/nightwatchcybersecurity/truegaze/releases/download/0.1.7/truegaze-0.1.7-py3-none-any.whl",
+    "checksum_value": "9a8aab2ff0a786253732217932bbeb92e9756070786a7f90ded356a1c9a5df06",
     "verification_mode": "pgpchecksumfile",
     "verified": false,
     "output": "[GNUPG:] NEWSIG\ngpg: Signature made Thu May  6 16:44:40 2021 EDT\ngpg:                using RSA key C0358DD666913D8FF1F17AB3C8EF5FF3BF864E50\n[GNUPG:] KEY_CONSIDERED C0358DD666913D8FF1F17AB3C8EF5FF3BF864E50 0\n[GNUPG:] KEY_CONSIDERED C0358DD666913D8FF1F17AB3C8EF5FF3BF864E50 0\n[GNUPG:] BADSIG C8EF5FF3BF864E50 Nightwatch Cybersecurity <yakov@nightwatchcybersecurity.com>\ngpg: BAD signature from \"Nightwatch Cybersecurity <yakov@nightwatchcybersecurity.com>\" [unknown]\n[GNUPG:] VERIFICATION_COMPLIANCE_MODE 23\n[GNUPG:] FAILURE gpg-exit 33554433\n"

@@ -7,6 +7,7 @@
     "url",
     "timestamp",
     "filename_url",
+    "checksum_value",
     "verification_mode",
     "verified",
     "output"
@@ -31,6 +32,10 @@
       "title": "File URL to be checked",
       "pattern": "^https://(.*)$"
      },
+    "checksum_value": {
+      "type": "string",
+      "title": "Checksum calculated on the file using SHA-256"
+    },
     "verification_mode": {
       "type": "string",
       "enum": [

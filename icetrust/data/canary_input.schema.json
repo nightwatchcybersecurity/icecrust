@@ -48,7 +48,8 @@
       "properties": {
         "checksum_value": {
           "type": "string",
-          "title": "Checksum value to validate the file against" },
+          "title": "Checksum value to validate the file against"
+        },
         "algorithm": { "$ref": "#/definitions/valid_algorithm" }
       },
       "required": ["checksum_value"]

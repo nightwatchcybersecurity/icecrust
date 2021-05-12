@@ -169,7 +169,7 @@ class TestExtractVerificationData(object):
 
 # Tests for generate_json method
 class TestGenerateJson(object):
-    def test_valid(self):
+    def test_valid(self, tmp_path):
         config_data = dict()
         config_data['name'] = 'foobar1'
         config_data['url'] = 'https://www.example.com'
@@ -177,7 +177,8 @@ class TestGenerateJson(object):
         verification_mode = VerificationModes.PGPCHECKSUMFILE
         verified_result = False
         cmd_output = ['foobar2', 'foobar3']
-        json_raw = IcetrustCanaryUtils.generate_json(config_data, verification_mode, verified_result, cmd_output)
+        json_raw = IcetrustCanaryUtils.generate_json(config_data, verification_mode, verified_result, cmd_output,
+                                                     os.path.join(TEST_DIR, 'file1.txt'))
         json_parsed = json.loads(json_raw)
 
         schema_data = json.load(open(CANARY_OUTPUT_SCHEMA, 'r'))

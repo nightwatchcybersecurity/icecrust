@@ -27,6 +27,7 @@ from urllib.parse import urlparse
 import json, os, pkg_resources
 
 from download import download
+from filehash import filehash
 import jsonschema, tzlocal
 
 from icetrust.utils import DEFAULT_HASH_ALGORITHM, IcetrustUtils
@@ -157,7 +158,7 @@ class IcetrustCanaryUtils(object):
         return verification_data
 
     @staticmethod
-    def generate_json(config_data, verification_mode, verification_result, cmd_output, msg_callback=None):
+    def generate_json(config_data, verification_mode, verification_result, cmd_output, filename, msg_callback=None):
         """
         Generates the JSON object for output file
 
@@ -165,14 +166,20 @@ class IcetrustCanaryUtils(object):
         :param verification_mode: verification mode used
         :param verification_result: verification result
         :param cmd_output: command output
+        :param filename: filename to calculate checksum value on
         :param msg_callback: message callback object, can be used to collect additional data via .echo()
         :return: JSON object as string
         """
+        # Calculate checksum first
+        checksum_value = filehash.FileHash('sha256').hash_file(filename=filename)
+
+        # Construct JSON
         output_obj = dict()
         output_obj['name'] = config_data['name']
         output_obj['url'] = config_data['url']
         output_obj['timestamp'] = datetime.now(tzlocal.get_localzone()).isoformat()
         output_obj['filename_url'] = config_data['filename_url']
+        output_obj['checksum_value'] = checksum_value
         output_obj['verification_mode'] = verification_mode.name.lower()
         output_obj['verified'] = verification_result
         output_obj['output'] = ', '.join(cmd_output)
