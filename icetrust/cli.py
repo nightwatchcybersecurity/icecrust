@@ -104,9 +104,11 @@ def canary(verbose, configfile, output_json):
                                                                 cmd_output=import_output,
                                                                 msg_callback=msg_callback)
         if import_result is False:
-            json_data = IcetrustCanaryUtils.generate_json(config_data, verification_mode, import_result,
-                                                          import_output, msg_callback)
-            open(output_json, "w").write(json_data)
+            if output_json is not None:
+                json_data = IcetrustCanaryUtils.generate_json(config_data, verification_mode, import_result,
+                                                              import_output, msg_callback)
+                open(output_json, "w").write(json_data)
+
             _process_result(import_result)
 
     # Main operation code
