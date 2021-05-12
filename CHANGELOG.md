@@ -1,7 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.1.2] - 2021-xx-xx
+## [0.1.3] - 2021-xx-xx
+- TBD
+
+## [0.1.2] - 2021-05-11
 - Fixing PGP key bug when JSON output file is not specified
 
 ## [0.1.1] - 2021-05-07
