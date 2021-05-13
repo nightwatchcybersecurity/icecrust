@@ -45,4 +45,4 @@ jobs:
         icetrust --version
         icetrust checksumfile test_data/file1.txt test_data/file1.txt.SHA256SUMS
         icetrust canary test_data/canary_input/checksum_previous.json --save-file out.txt
-        cat out.txt
+        diff out.txt test_data/file3.txt
