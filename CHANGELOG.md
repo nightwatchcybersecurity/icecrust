@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.1.5] - 2021-XX-XX
+- TBD
+
 ## [0.1.4] - 2021-05-12
 - Fixes for dir+file issues
 - Performance enhancement to avoid double downloads
