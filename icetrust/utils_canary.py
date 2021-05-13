@@ -94,7 +94,8 @@ class IcetrustCanaryUtils(object):
         :return: one of VERIFICATION_MODES or None if none are found
         """
         # Main file is always downloaded
-        msg_callback.echo('Downloading file: ' + filename_url)
+        if msg_callback:
+            msg_callback.echo('Downloading file: ' + filename_url)
         IcetrustCanaryUtils.download_file(filename_url, dir, FILENAME_FILE1, msg_callback=msg_callback)
 
         # Download comparison file
