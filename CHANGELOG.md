@@ -1,13 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.1.5] - 2021-XX-XX
-- TBD
+## [0.1.5] - 2021-05-12
+- Bug fix
 
 ## [0.1.4] - 2021-05-12
 - Fixes for dir+file issues
 - Performance enhancement to avoid double downloads
-
+    
 ## [0.1.3] - 2021-05-12
 - Added file checksum to output JSON for canary mode
 - Added ability to check a previous version
