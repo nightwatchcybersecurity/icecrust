@@ -108,7 +108,8 @@ def canary(verbose, configfile, output_json, save_file):
         if import_result is False:
             if output_json is not None:
                 json_data = IcetrustCanaryUtils.generate_json(config_data, verification_mode, import_result,
-                                                              import_output, temp_dir + FILENAME_FILE1, msg_callback)
+                                                              import_output, os.path.join(temp_dir, FILENAME_FILE1),
+                                                              msg_callback)
                 open(output_json, "w").write(json_data)
 
             _process_result(import_result)
@@ -116,31 +117,34 @@ def canary(verbose, configfile, output_json, save_file):
     # Main operation code
     verification_result = False
     if verification_mode == VerificationModes.COMPARE_FILES:
-        verification_result = IcetrustUtils.compare_files(temp_dir + FILENAME_FILE1, temp_dir + FILENAME_FILE2,
+        verification_result = IcetrustUtils.compare_files(os.path.join(temp_dir, FILENAME_FILE1),
+                                                          os.path.join(temp_dir, FILENAME_FILE2),
                                                           msg_callback=msg_callback, cmd_output=cmd_output)
     elif verification_mode == VerificationModes.CHECKSUM:
         algorithm = IcetrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
-        verification_result = IcetrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
+        verification_result = IcetrustUtils.verify_checksum(os.path.join(temp_dir, FILENAME_FILE1), algorithm,
                                                             checksum_value=verification_data['checksum_value'],
                                                             msg_callback=msg_callback, cmd_output=cmd_output)
     elif verification_mode == VerificationModes.CHECKSUMFILE:
         algorithm = IcetrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
-        verification_result = IcetrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
-                                                            checksumfile=temp_dir + FILENAME_CHECKSUM,
+        verification_result = IcetrustUtils.verify_checksum(os.path.join(temp_dir, FILENAME_FILE1), algorithm,
+                                                            checksumfile=os.path.join(temp_dir, FILENAME_CHECKSUM),
                                                             msg_callback=msg_callback, cmd_output=cmd_output)
     elif verification_mode == VerificationModes.PGP:
-        verification_result = IcetrustUtils.pgp_verify(gpg, temp_dir + FILENAME_FILE1, temp_dir + FILENAME_SIGNATURE,
+        verification_result = IcetrustUtils.pgp_verify(gpg, os.path.join(temp_dir, FILENAME_FILE1),
+                                                       os.path.join(temp_dir, FILENAME_SIGNATURE),
                                                        msg_callback=msg_callback, cmd_output=cmd_output)
     elif verification_mode == VerificationModes.PGPCHECKSUMFILE:
         # Verify the signature of the checksum file first
-        signature_result = IcetrustUtils.pgp_verify(gpg, temp_dir + FILENAME_CHECKSUM, temp_dir + FILENAME_SIGNATURE,
+        signature_result = IcetrustUtils.pgp_verify(gpg, os.path.join(temp_dir, FILENAME_CHECKSUM),
+                                                    os.path.join(temp_dir, FILENAME_SIGNATURE),
                                                     msg_callback=msg_callback, cmd_output=cmd_output)
 
         # Then verify the checksums themselves
         if signature_result:
             algorithm = IcetrustCanaryUtils.get_algorithm(verification_data, msg_callback=msg_callback)
-            verification_result = IcetrustUtils.verify_checksum(temp_dir + FILENAME_FILE1, algorithm,
-                                                                checksumfile=temp_dir + FILENAME_CHECKSUM,
+            verification_result = IcetrustUtils.verify_checksum(os.path.join(temp_dir, FILENAME_FILE1), algorithm,
+                                                                checksumfile=os.path.join(temp_dir, FILENAME_CHECKSUM),
                                                                 msg_callback=msg_callback, cmd_output=cmd_output)
     else:
         click.echo("ERROR: Verification mode not supported!")
@@ -152,7 +156,8 @@ def canary(verbose, configfile, output_json, save_file):
         previous_file_path = os.path.join(os.getcwd(), config_data['previous_version'])
         if os.path.exists(previous_file_path):
             click.echo('\nComparing with previous version...')
-            comparison_result = IcetrustUtils.compare_files(config_data['previous_version'], temp_dir + FILENAME_FILE1,
+            comparison_result = IcetrustUtils.compare_files(config_data['previous_version'],
+                                                            os.path.join(temp_dir, FILENAME_FILE1),
                                                             msg_callback=msg_callback)
             if comparison_result:
                 click.echo('File matches previous version')
@@ -162,13 +167,14 @@ def canary(verbose, configfile, output_json, save_file):
     # Saves the file if needed
     if save_file is not None:
         click.echo('\nSaving file...')
-        shutil.copy(temp_dir + FILENAME_FILE1, save_file)
+        shutil.copy(os.path.join(temp_dir, FILENAME_FILE1), save_file)
 
     # Generate JSON file if needed
     if output_json is not None:
         json_data = IcetrustCanaryUtils.generate_json(config_data, verification_mode,
                                                       verification_result, comparison_result,
-                                                      cmd_output, temp_dir + FILENAME_FILE1, msg_callback)
+                                                      cmd_output, os.path.join(temp_dir, FILENAME_FILE1),
+                                                      msg_callback)
         open(output_json, "w").write(json_data)
 
     _process_result(verification_result)

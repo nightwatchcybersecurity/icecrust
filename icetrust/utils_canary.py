@@ -24,7 +24,7 @@
 from datetime import datetime
 from enum import Enum
 from urllib.parse import urlparse
-import json, os, pkg_resources
+import json, os, pkg_resources, shutil
 
 from download import download
 from filehash import filehash
@@ -99,8 +99,12 @@ class IcetrustCanaryUtils(object):
 
         # Download comparison file
         if verification_mode == VerificationModes.COMPARE_FILES:
-            IcetrustCanaryUtils.download_file(verification_data['file2_url'], dir, FILENAME_FILE2,
-                                              msg_callback=msg_callback)
+            # If the URLs of the two files are same, simply make a copy, otherwise download
+            if filename_url == verification_data['file2_url']:
+                shutil.copy(os.path.join(dir, FILENAME_FILE2), os.path.join(dir, FILENAME_FILE1))
+            else:
+                IcetrustCanaryUtils.download_file(verification_data['file2_url'], dir, FILENAME_FILE2,
+                                                  msg_callback=msg_callback)
 
         # Download checksum files
         if verification_mode in [VerificationModes.CHECKSUMFILE,
@@ -244,7 +248,7 @@ class IcetrustCanaryUtils(object):
         """
         keyfile_path = None
         if 'keyfile_url' in verification_data:
-            keyfile_path = dir + FILENAME_KEYS
+            keyfile_path = os.path.join(dir, FILENAME_KEYS)
 
         # Do the actual import
         import_result = IcetrustUtils.pgp_import_keys(gpg, keyfile=keyfile_path,

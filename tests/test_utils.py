@@ -268,11 +268,11 @@ class TestUtilsPgpInit(object):
 class TestUtilsVerifyChecksum(object):
     def test_doesnt_exists_file(self):
         assert IcetrustUtils.verify_checksum(os.path.join(TEST_DIR, 'foobar.txt'), DEFAULT_HASH_ALGORITHM,
-                                             checksumfile=TEST_DIR + 'file1.txt.SHA256SUMS') is False
+                                             checksumfile=os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS')) is False
 
     def test_doesnt_exists_file_verbose(self, mock_msg_callback):
         assert IcetrustUtils.verify_checksum(os.path.join(TEST_DIR, 'foobar.txt'), DEFAULT_HASH_ALGORITHM,
-                                             checksumfile=TEST_DIR + 'file1.txt.SHA256SUMS',
+                                             checksumfile=os.path.join(TEST_DIR, 'file1.txt.SHA256SUMS'),
                                              msg_callback=mock_msg_callback) is False
         assert len(mock_msg_callback.messages) == 1
         assert mock_msg_callback.messages[0] == "[Errno 2] No such file or directory: 'test_data/foobar.txt'"
