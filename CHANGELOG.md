@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [0.1.4] - 2021-XX-XX
+- TBD
+
 ## [0.1.3] - 2021-05-12
 - Added file checksum to output JSON for canary mode
 - Added ability to check a previous version
