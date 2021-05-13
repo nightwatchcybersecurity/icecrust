@@ -94,13 +94,14 @@ class IcetrustCanaryUtils(object):
         :return: one of VERIFICATION_MODES or None if none are found
         """
         # Main file is always downloaded
-        print('Downloading file: ' + filename_url)
+        msg_callback.echo('Downloading file: ' + filename_url)
         IcetrustCanaryUtils.download_file(filename_url, dir, FILENAME_FILE1, msg_callback=msg_callback)
 
         # Download comparison file
         if verification_mode == VerificationModes.COMPARE_FILES:
             # If the URLs of the two files are same, simply make a copy, otherwise download
             if filename_url == verification_data['file2_url']:
+                msg_callback.echo("Both file URLs match, copying original file")
                 shutil.copy(os.path.join(dir, FILENAME_FILE2), os.path.join(dir, FILENAME_FILE1))
             else:
                 IcetrustCanaryUtils.download_file(verification_data['file2_url'], dir, FILENAME_FILE2,
