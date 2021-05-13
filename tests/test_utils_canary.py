@@ -176,9 +176,10 @@ class TestGenerateJson(object):
         config_data['filename_url'] = 'https://www.example.com/file.sh'
         verification_mode = VerificationModes.PGPCHECKSUMFILE
         verified_result = False
+        comparison_result = False
         cmd_output = ['foobar2', 'foobar3']
-        json_raw = IcetrustCanaryUtils.generate_json(config_data, verification_mode, verified_result, cmd_output,
-                                                     os.path.join(TEST_DIR, 'file1.txt'))
+        json_raw = IcetrustCanaryUtils.generate_json(config_data, verification_mode, verified_result, comparison_result,
+                                                     cmd_output, os.path.join(TEST_DIR, 'file1.txt'))
         json_parsed = json.loads(json_raw)
 
         schema_data = json.load(open(CANARY_OUTPUT_SCHEMA, 'r'))
@@ -190,6 +191,7 @@ class TestGenerateJson(object):
         assert(json_parsed['filename_url']) == config_data['filename_url']
         assert(json_parsed['verification_mode']) == VerificationModes.PGPCHECKSUMFILE.value
         assert (json_parsed['verified']) == verified_result
+        assert (json_parsed['previous_version_matched']) == comparison_result
         assert (json_parsed['output']) == ', '.join(cmd_output)
 
 

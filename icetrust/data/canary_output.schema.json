@@ -51,6 +51,10 @@
       "type": "boolean",
       "title": "Whether verification was successful or not"
      },
+    "previous_version_matched": {
+      "type": "boolean",
+      "title": "Whether the file matches a previous version, not present if the previous version is missing"
+     },
     "output": {
       "type": "string",
       "title": "Output/logs of the verification process"

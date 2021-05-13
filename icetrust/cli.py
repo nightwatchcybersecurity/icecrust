@@ -21,7 +21,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os, sys, tempfile
+import os, shutil, sys, tempfile
 
 import click
 from icetrust.utils import DEFAULT_HASH_ALGORITHM, IcetrustUtils
@@ -56,8 +56,10 @@ def _process_result(verification_result):
 @click.option('--verbose', is_flag=True, help='Output additional information during the verification process')
 @click.option('--output-json', required=False, type=click.Path(dir_okay=False, exists=False),
               help='Output results of the command into a JSON file')
+@click.option('--save-file', required=False, type=click.Path(dir_okay=False, exists=False),
+              help='Saves the downloaded file to the provided location')
 @click.argument('configfile', required=True, type=click.File('r'))
-def canary(verbose, configfile, output_json):
+def canary(verbose, configfile, output_json, save_file):
     """Does a canary check against a project using information in CONFIGFILE"""
     # Setup objects to be used
     cmd_output = []
@@ -144,10 +146,29 @@ def canary(verbose, configfile, output_json):
         click.echo("ERROR: Verification mode not supported!")
         sys.exit(-1)
 
+    # Compare previous version if needed
+    comparison_result = None
+    if 'previous_version' in config_data:
+        previous_file_path = os.path.join(os.getcwd(), config_data['previous_version'])
+        if os.path.exists(previous_file_path):
+            click.echo('\nComparing with previous version...')
+            comparison_result = IcetrustUtils.compare_files(config_data['previous_version'], temp_dir + FILENAME_FILE1,
+                                                            msg_callback=msg_callback)
+            if comparison_result:
+                click.echo('File matches previous version')
+            else:
+                click.echo('ERROR: File doesn\'t match previous version!')
+
+    # Saves the file if needed
+    if save_file is not None:
+        click.echo('\nSaving file...')
+        shutil.copy(temp_dir + FILENAME_FILE1, save_file)
+
     # Generate JSON file if needed
     if output_json is not None:
-        json_data = IcetrustCanaryUtils.generate_json(config_data, verification_mode, verification_result,
-                                                        cmd_output, temp_dir + FILENAME_FILE1, msg_callback)
+        json_data = IcetrustCanaryUtils.generate_json(config_data, verification_mode,
+                                                      verification_result, comparison_result,
+                                                      cmd_output, temp_dir + FILENAME_FILE1, msg_callback)
         open(output_json, "w").write(json_data)
 
     _process_result(verification_result)

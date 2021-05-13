@@ -158,13 +158,15 @@ class IcetrustCanaryUtils(object):
         return verification_data
 
     @staticmethod
-    def generate_json(config_data, verification_mode, verification_result, cmd_output, filename, msg_callback=None):
+    def generate_json(config_data, verification_mode, verification_result, comparison_result, cmd_output, filename,
+                      msg_callback=None):
         """
         Generates the JSON object for output file
 
         :param config_data: parsed JSON config
         :param verification_mode: verification mode used
         :param verification_result: verification result
+        :param comparison_result: result of comparison against previous version
         :param cmd_output: command output
         :param filename: filename to calculate checksum value on
         :param msg_callback: message callback object, can be used to collect additional data via .echo()
@@ -182,6 +184,10 @@ class IcetrustCanaryUtils(object):
         output_obj['checksum_value'] = checksum_value
         output_obj['verification_mode'] = verification_mode.name.lower()
         output_obj['verified'] = verification_result
+
+        if comparison_result is not None:
+            output_obj['previous_version_matched'] = comparison_result
+
         output_obj['output'] = ', '.join(cmd_output)
         json_data = json.dumps(output_obj, indent=4)
 

@@ -25,6 +25,10 @@
       "title": "URL of the file being verified",
       "pattern": "^https://(.*)$"
      },
+    "previous_version": {
+      "type": "string",
+      "title": "Location of the previous version of the file on disk, to the config file"
+     },
     "compare_files": { "$ref": "#/definitions/compare_files" },
     "checksum": { "$ref": "#/definitions/checksum" },
     "checksumfile": { "$ref": "#/definitions/checksumfile" },
