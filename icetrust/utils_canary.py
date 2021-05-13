@@ -103,7 +103,7 @@ class IcetrustCanaryUtils(object):
             if filename_url == verification_data['file2_url']:
                 if msg_callback:
                     msg_callback.echo("Both file URLs match, copying original file")
-                shutil.copy(os.path.join(dir, FILENAME_FILE2), os.path.join(dir, FILENAME_FILE1))
+                shutil.copy(os.path.join(dir, FILENAME_FILE1), os.path.join(dir, FILENAME_FILE2))
             else:
                 IcetrustCanaryUtils.download_file(verification_data['file2_url'], dir, FILENAME_FILE2,
                                                   msg_callback=msg_callback)
