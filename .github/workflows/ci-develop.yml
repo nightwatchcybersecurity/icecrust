@@ -43,4 +43,5 @@ jobs:
       run: |
         python setup.py install
         icetrust --version
-        icetrust checksumfile test_data/file1.txt test_data/file1.txt.SHA256SUMS
+        icetrust checksumfile test_data/file1.txt test_data/file1.txt.SHA256SUMS --save-file out.txt
+        cat out.txt
