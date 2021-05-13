@@ -46,7 +46,7 @@ class IcetrustUtils(object):
     @staticmethod
     def get_version():
         """Gets the current version"""
-        return "0.1.5"
+        return "0.1.6"
 
     @staticmethod
     def compare_files(file1, file2, msg_callback=None, cmd_output=None):
